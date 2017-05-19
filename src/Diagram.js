@@ -90,13 +90,6 @@ export default class Diagram {
 		this._container = d3.select(selector);
 		this._el = this._container.append("div").classed(style.diagram, true);
 		this._plumb = jsPlumb.getInstance();
-
-		// this._group = d3.select("#content")
-		// 	.append("svg")
-		// 	.attr("width", width)
-		// 	.attr("height", height)
-		// 	.call(zoom)
-		// 	.append("g");		
 	}
 
 	_getKlayGraph(){
@@ -119,6 +112,13 @@ export default class Diagram {
 		}
 	}
 
+	_setGraphSize(nodes){
+		var maxHeight = Math.max.apply(Math, nodes.map(node=>node.y+node.height));
+		var maxWidth = Math.max.apply(Math, nodes.map(node=>node.x+node.width));
+
+		this._el.style("width", maxWidth+"px");
+		this._el.style("height", maxHeight+"px");
+	}
 
 	/**
 	 * Renders nodes
@@ -154,7 +154,8 @@ export default class Diagram {
 					});
 
 					this._renderEdges();
-					this._plumb.draggable(document.querySelectorAll("."+style.node));	
+					this._plumb.draggable(document.querySelectorAll("."+style.node));
+					this._setGraphSize(layouted.children);	
 					success();									
 				},
 				error: function(error) { 
@@ -287,44 +288,6 @@ export default class Diagram {
 			});
 		});
 	}
-
-	// /**
-	//  * Renders edges
-	//  */
-	// _renderEdges(){
-	// 	// this._edges.forEach(edge=>{
-	// 	// 	var overlay = this._getEdgeOverlay(edge);
-	// 	// 	jsPlumb.connect({
-	// 	// 		source:edge.start,
-	// 	// 		target:edge.end,
-	// 	// 		anchor:[ "TopCenter","RightMiddle","BottomCenter","LeftMiddle" ],
-	// 	// 		endpoint:"Blank",
-	// 	// 		paintStyle:{ stroke:'#546E7A', strokeWidth:2 },
-	// 	// 		connector :"Straight", //"Flowchart" "Straight",
-	// 	// 		overlays: overlay,
-	// 	// 		endpointStyle:{ fill: "black" }				
-	// 	// 	});
-	// 	// });
-
-	// 	// #2 add paths with arrows for the edges
-
-	// 	this._edges.forEach(edge=>{
-	// 		var link = this._groupEl.append("path")
-	// 		.attr("class", "link")
-	// 		.attr("d", ()=>{
-	// 			var path = "";
-	// 			if (d.sourcePoint && d.targetPoint) {
-	// 				path += "M" + d.sourcePoint.x + " " + d.sourcePoint.y + " ";
-	// 				(d.bendPoints || []).forEach(function(bp, i) {
-	// 					path += "L" + bp.x + " " + bp.y + " ";
-	// 				});
-	// 				path += "L" + d.targetPoint.x + " " + d.targetPoint.y + " ";
-	// 			}
-	// 			return path;
-	// 		})
-	// 		.attr("marker-end", "url(#end)");
-	// 	});
-	// }	
 
 	/**
 	 * Sets widget data
