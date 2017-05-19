@@ -78,6 +78,7 @@ export default class Diagram {
 		this._observable.destroy();
 		this._plumb.clear();
 		this._el.remove();
+		this._group.remove();
 		return this;
 	}	
 
@@ -88,8 +89,31 @@ export default class Diagram {
 	 */
 	render(selector) {
 		this._container = d3.select(selector);
-		this._el = this._container.append("div").classed(style.diagram, true);
 		this._plumb = jsPlumb.getInstance();
+
+		this._svg = this._container
+			.append("svg")
+			.style("position", "absolute")
+			.attr("pointer-events", "none");
+
+		this._group = this._svg.append("g");		
+
+		// define an arrow head
+		this._group.append("svg:defs")
+			.append("svg:marker")
+			.attr("id", "end")
+			.attr("viewBox", "0 -5 10 10")
+			.attr("refX", 10)
+			.attr("refY", 0)
+			.attr("markerWidth", 5)        // marker settings
+			.attr("markerHeight", 5)
+			.attr("orient", "auto")
+			.style("fill", "#546E7A")
+			.style("stroke-opacity", 0.6)  // arrowhead color
+			.append("svg:path")
+			.attr("d", "M0,-5L10,0L0,5");			
+
+		this._el = this._container.append("div").classed(style.diagram, true);			
 	}
 
 	_getKlayGraph(){
@@ -98,7 +122,7 @@ export default class Diagram {
 			"children": this._nodes.map(node=>{
 				return {
 					id:node.name,
-					width:150,
+					width:200,
 					height:50
 				}
 			}),
@@ -118,6 +142,9 @@ export default class Diagram {
 
 		this._el.style("width", maxWidth+"px");
 		this._el.style("height", maxHeight+"px");
+
+		this._svg.attr("width", maxWidth);
+		this._svg.attr("height", maxHeight);
 	}
 
 	/**
@@ -135,7 +162,7 @@ export default class Diagram {
 					direction: "RIGHT",
 					//thoroughness:50,
 					//crossMin:"LAYER_SWEEP",
-					mergeEdges:true,
+					mergeEdges:false,
 					//linearSegmentsDeflectionDampening:0.5,
 					layerConstraint:"LAST_SEPARATE",
 					nodePlace:"BRANDES_KOEPF", // LINEAR_SEGMENTS BRANDES_KOEPF
@@ -149,12 +176,11 @@ export default class Diagram {
 							width:layouted.children[i].width,
 							height:layouted.children[i].height
 						};
-
+						
 						this._renderNode(node, styles);
 					});
 
-					this._renderEdges();
-					this._plumb.draggable(document.querySelectorAll("."+style.node));
+					this._renderEdges(layouted);
 					this._setGraphSize(layouted.children);	
 					success();									
 				},
@@ -270,10 +296,18 @@ export default class Diagram {
 		}[edge.type]
 	}
 
+	_renderEdges(layouted){
+		if (this._options.editable){
+			this._renderEdgesEditable();
+		} else {
+			this._renderEdgesStatic(layouted);
+		}
+	}
+
 	/**
 	 * Renders edges
 	 */
-	_renderEdges(){
+	_renderEdgesEditable(){
 		this._edges.forEach(edge=>{
 			var overlay = this._getEdgeOverlay(edge);
 			this._plumb.connect({
@@ -287,7 +321,39 @@ export default class Diagram {
 				endpointStyle:{ fill: "black" }				
 			});
 		});
+		
+		this._plumb.draggable(document.querySelectorAll("."+style.node));		
 	}
+
+	/**
+	 * Renders edges
+	 */
+	_renderEdgesStatic(layout){
+		this._edges.forEach((edge, i)=>{
+			var link = this._group.append("path")
+			.attr("class", "link")
+			.attr("stroke", "#546E7A")
+			.attr("stroke-width", 2)
+			.attr("fill", "transparent")
+			.attr("d", ()=>{
+				var d = layout.edges[i];
+				var path = "";
+				if (d.sourcePoint && d.targetPoint) {
+					path += "M" + d.sourcePoint.x + " " + d.sourcePoint.y + " ";
+					(d.bendPoints || []).forEach(function(bp, i) {
+						path += "L" + bp.x + " " + bp.y + " ";
+					});
+					path += "L" + d.targetPoint.x + " " + d.targetPoint.y + " ";
+				}
+				return path;
+			})
+
+			if (edge.type == "arrow"){
+				link.attr("marker-end", "url(#end)");
+			}
+			
+		});
+	}		
 
 	/**
 	 * Sets widget data
