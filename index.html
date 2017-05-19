@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/4.9.1/d3.min.js"></script>
+    <script src="//unpkg.com/klayjs@0.4.1"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jsPlumb/2.2.9/jsplumb.min.js"></script>
+    <script src="dist/diagram.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"/>
+</head>
+
+<style>
+    html {
+        background-image: url("images/bg.png");
+    }
+    body {
+        margin: 0;
+    }
+
+    .graph-ct {
+        position: absolute;
+        top:50px;
+    }
+</style>
+
+<body>
+    <button id="selectNode">Toggle select (zsj_d_dwh)</button>
+    <button id="highlightNode">Toggle highlight (okres_wfs)</button>
+    <button id="make1">Make DJ </button>
+    <button id="make2">Make Roznosy </button>
+    <button id="make3">Make Benu </button>
+
+    <div class="graph-ct"></div>
+
+    <script>
+        var diagram;
+        var makeDiagram = (dataUrl) => {
+            d3.select(".graph-ct").html("");
+
+            if (diagram) diagram.destroy();
+
+            diagram = new Diagram({
+                groupColors:{
+                    "admin":"#2196F3",
+                    "default":"#4CAF50"
+                }
+            });
+
+            diagram.render(".graph-ct");
+
+            d3.json(dataUrl, (json) => {
+                diagram.setData(json);
+            });
+
+            diagram.on("nodeSelected", (nodeName)=>{
+                console.log("selected:" +nodeName);
+            })
+
+            diagram.on("nodeDeselected", (nodeName)=>{
+                console.log("deselected:" +nodeName);
+            })
+
+            diagram.on("nodeHighlight", (nodeName, highlighted)=>{
+                console.log("highlighted:" +nodeName + " ("+highlighted+")");
+            })
+
+            d3.select("#selectNode").on("click", ()=>{
+                diagram.selectNode("zsj_d_dwh");
+            })
+
+            var highlighted = false;
+            d3.select("#highlightNode").on("click", ()=>{
+                highlighted = !highlighted;
+                diagram.highlightNode("okres_wfs", highlighted);
+            })
+        }
+
+        makeDiagram("https://private-b47e7-datasetvizualization.apiary-mock.com/model/dj");
+
+        d3.select("#make1").on("click", ()=>{
+            makeDiagram("https://private-b47e7-datasetvizualization.apiary-mock.com/model/dj");
+        })        
+
+        d3.select("#make2").on("click", ()=>{
+            makeDiagram("https://private-b47e7-datasetvizualization.apiary-mock.com/model/roznosy");
+        })        
+
+        d3.select("#make3").on("click", ()=>{
+            makeDiagram("https://private-b47e7-datasetvizualization.apiary-mock.com/model/benu");
+        })        
+        
+    </script>
+</body>

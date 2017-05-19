@@ -1,0 +1,34 @@
+.diagram {
+ 
+}
+
+.node {
+    position: absolute;
+    display: table;
+    cursor: pointer;
+    box-sizing: border-box;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
+.node-selected {
+    border:2px solid #546E7A;
+}
+
+.node-highlighted {
+    background-color:#FFEB3B !important;
+}
+
+.node-highlighted>.node-text {
+    background-color:#FFEB3B !important;
+    color:black;
+}
+
+.node-text {
+    text-align: center;
+    display: table-cell;
+    color:white;
+    text-transform: uppercase;
+    vertical-align: middle;
+    font-family: 'Roboto';
+    font-size:13px;
+}
