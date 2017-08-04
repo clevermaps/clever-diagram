@@ -5,7 +5,6 @@ import postcssModules from 'postcss-modules';
 import uglify from 'rollup-plugin-uglify';
 
 let pkg = require('./package.json');
-let external = Object.keys(pkg.dependencies);
 
 const cssExportMap = {};
 
@@ -29,10 +28,9 @@ export default {
   ],
   globals:{
     "d3":"d3",
-    "$klay":"$klay",
-    "jsPlumb":"jsPlumb"
+    "ELK":"ELK"
   },
-  external: external,
+  external: ["d3", "ELK"],
   targets: [
     {
       dest: pkg.main,

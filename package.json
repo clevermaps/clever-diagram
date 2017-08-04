@@ -2,7 +2,7 @@
   "name": "Diagram",
   "version": "1.0.0",
   "description": "diagram widget.",
-  "main": "dist/diagram.min.js",
+  "main": "dist/can-diagram.min.js",
   "scripts": {
     "prebuild": "eslint src test",
     "build": "rollup -c",
@@ -22,7 +22,8 @@
     "dist"
   ],
   "dependencies": {
-    "d3": "^4.8.0"
+    "d3": "^4.10.0",
+    "elkjs":"0.0.1"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
