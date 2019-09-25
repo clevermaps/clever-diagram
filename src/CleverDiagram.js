@@ -1,14 +1,14 @@
 import Observable from "./utils/Observable";
-import style from "./Diagram.css";
+import style from "./CleverDiagram.css";
 import * as d3 from "d3";
 import * as ELK from "ELK";
 
 /**
  * @class
- * Main Diagram class
+ * Main CleverDiagram class
  * @param {Object} options
  */
-export default class Diagram {
+export default class CleverDiagram {
 	constructor(options) {
 		/**
 		 * @private
@@ -16,13 +16,13 @@ export default class Diagram {
 		 */
 		this._observable = new Observable([
 			/**
-			 * @event 
+			 * @event
 			 * Fires when node is clicked
 			 * @param {String} node name
 			 */
 			"nodeClick",
 			/**
-			 * @event 
+			 * @event
 			 * Fires when node is highlighted
 			 * @param {String} node name
 			 * @param {Boolean} highlighted
@@ -38,10 +38,10 @@ export default class Diagram {
 
 		this._elk = new ELK({
 			workerUrl: options.elkWorkerUrl
-		});		
+		});
 
 		/**
-		 * @private 
+		 * @private
 		 * DOM container for diagram
 		 */
 		this._container = null;
@@ -84,7 +84,7 @@ export default class Diagram {
 
 	/**
 	 * Render logic of this widget
-	 * @param {String|DOMElement} selector selector or DOM element 
+	 * @param {String|DOMElement} selector selector or DOM element
 	 * @returns {Bar} returns this widget instance
 	 */
 	render(selector) {
@@ -116,7 +116,7 @@ export default class Diagram {
 	}
 
 	_getRootProperties(){
-		return { 
+		return {
 			'algorithm': 'layered',
 			'direction':'RIGHT'
 		}
@@ -126,7 +126,7 @@ export default class Diagram {
 		return {
 			"id": "root",
 			properties: this._getRootProperties(),
-			"children": this._nodes.map(node => { 
+			"children": this._nodes.map(node => {
 				return {
 					id: node.name,
 					width: 200,
@@ -180,7 +180,7 @@ export default class Diagram {
 
 /**
  * @public
- * Selects node 
+ * Selects node
  * @param nodeName
  * @param selected
  */
@@ -204,7 +204,7 @@ selectNode(nodeName, selected){
 
 /**
  * @public
- * Highlights node 
+ * Highlights node
  * @param nodeName
  * @param highlighted
  */
@@ -241,7 +241,7 @@ _onMouseUp(nodeName){
 	this._dragging = false;
 }
 /**
- * Renders node 
+ * Renders node
  * @param node
  */
 _renderNode(node, styles){
@@ -316,7 +316,7 @@ _renderEdges(layout){
 /**
  * Sets widget data
  * @param {Array} data
- * @returns {Bar} returns this widget instance 
+ * @returns {Bar} returns this widget instance
  */
 setData(data) {
 	if (!this._container) throw "Diagram is not rendered"

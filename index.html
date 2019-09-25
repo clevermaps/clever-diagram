@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 
-<head>    
-    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/4.9.1/d3.min.js"></script>
+<head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
     <script src="dist/elk-api.js"></script>
-    <script src="dist/can-diagram.min.js"></script>
+    <script src="dist/clever-diagram-1.1.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
 </head>
@@ -84,21 +84,21 @@
         d3.select("#make1").on("click", ()=>{
             dataUrl = "https://private-b47e7-datasetvizualization.apiary-mock.com/model/dj";
             makeDiagram();
-        })        
+        })
 
         d3.select("#make2").on("click", ()=>{
             dataUrl = "https://private-b47e7-datasetvizualization.apiary-mock.com/model/roznosy";
             makeDiagram();
-        })        
+        })
 
         d3.select("#make3").on("click", ()=>{
             dataUrl = "https://private-b47e7-datasetvizualization.apiary-mock.com/model/benu";
             makeDiagram();
-        })      
+        })
 
         d3.select("#editable").on("change", ()=>{
             makeDiagram();
-        })                  
-        
+        })
+
     </script>
 </body>
