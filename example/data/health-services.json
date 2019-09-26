@@ -1,0 +1,286 @@
+{
+    "nodes": [
+      {
+        "name": "benu",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "lekarny",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "lekari",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "lekari_geom",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "nemocnice",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "zsjd",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "orp",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "okres",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "okres_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "orp_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "zsjd_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "lekari_seznam",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "kartogram_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "kartogram",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "poi2",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "poi3",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "poi4",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "hm_rating",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "hm_potential",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "catch_feet",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "area-detail",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "store-in-area",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "store-in-area-mds",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "store-in-area-hospitals",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "benu_new",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "grid_wfs",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "grid_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "scoring",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "grid_vip",
+        "type": "slave",
+        "group": "default"
+      }
+    ],
+    "edges": [
+      {
+        "start": "zsjd_dwh",
+        "end": "orp_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "zsjd_dwh",
+        "end": "okres_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "zsjd_dwh",
+        "end": "kartogram_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "grid_dwh",
+        "end": "scoring",
+        "type": "arrow"
+      },
+      {
+        "start": "lekarny",
+        "end": "benu",
+        "type": "line"
+      },
+      {
+        "start": "benu",
+        "end": "lekarny",
+        "type": "line"
+      },
+      {
+        "start": "lekari_seznam",
+        "end": "lekari",
+        "type": "line"
+      },
+      {
+        "start": "benu",
+        "end": "lekari_geom",
+        "type": "line"
+      },
+      {
+        "start": "benu",
+        "end": "nemocnice",
+        "type": "line"
+      },
+      {
+        "start": "zsjd_dwh",
+        "end": "zsjd",
+        "type": "line"
+      },
+      {
+        "start": "orp_dwh",
+        "end": "orp",
+        "type": "line"
+      },
+      {
+        "start": "okres_dwh",
+        "end": "okres",
+        "type": "line"
+      },
+      {
+        "start": "lekari",
+        "end": "lekari_seznam",
+        "type": "line"
+      },
+      {
+        "start": "zsjd",
+        "end": "kartogram",
+        "type": "line"
+      },
+      {
+        "start": "lekari",
+        "end": "poi2",
+        "type": "line"
+      },
+      {
+        "start": "lekari",
+        "end": "poi3",
+        "type": "line"
+      },
+      {
+        "start": "lekari",
+        "end": "poi4",
+        "type": "line"
+      },
+      {
+        "start": "lekari",
+        "end": "hm_rating",
+        "type": "line"
+      },
+      {
+        "start": "lekari",
+        "end": "hm_potential",
+        "type": "line"
+      },
+      {
+        "start": "zsjd",
+        "end": "catch_feet",
+        "type": "line"
+      },
+      {
+        "start": "zsjd",
+        "end": "area-detail",
+        "type": "line"
+      },
+      {
+        "start": "zsjd",
+        "end": "store-in-area",
+        "type": "line"
+      },
+      {
+        "start": "zsjd",
+        "end": "store-in-area-mds",
+        "type": "line"
+      },
+      {
+        "start": "zsjd",
+        "end": "store-in-area-hospitals",
+        "type": "line"
+      },
+      {
+        "start": "benu",
+        "end": "benu_new",
+        "type": "line"
+      },
+      {
+        "start": "grid_dwh",
+        "end": "grid_wfs",
+        "type": "line"
+      },
+      {
+        "start": "grid_wfs",
+        "end": "grid_vip",
+        "type": "line"
+      }
+    ]
+  }

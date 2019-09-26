@@ -2,103 +2,45 @@
 <meta charset="utf-8">
 
 <head>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
-    <script src="dist/elk-api.js"></script>
-    <script src="dist/clever-diagram-1.1.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
 </head>
 
 <style>
-    html {
-        background-image: url("images/bg.png");
+    :root {
+        --red: #e8493f;
+        --black: #4a4a4a;
     }
     body {
-        margin: 0;
+        margin: 10%;
+        text-align: center;
+        font-family: Roboto;
     }
 
-    .graph-ct {
-        position: absolute;
-        padding-top:50px;
+    p a {
+        color: var(--red);
+    }
+
+    .btn {
+        display: block;
+        margin: 50px auto;
+        width: 200px;
+        background-color: var(--red);
+        padding: 10px;
+        color: white;
+        font-size: 24px;
+        text-decoration: none;
+        transition: background-color 250ms ease-in-out;
+    }
+
+    .btn:hover {
+        background-color: var(--black);
     }
 </style>
 
 <body>
-    <input type="checkbox" id="editable">Editable</button>
-    <button id="selectNode">Toggle select (zsj_d_dwh)</button>
-    <button id="highlightNode">Toggle highlight (okres_wfs)</button>
-    <button id="make1">Make DJ </button>
-    <button id="make2">Make Roznosy </button>
-    <button id="make3">Make Benu </button>
-
-    <div class="graph-ct"></div>
-
-    <script>
-        var diagram;
-        var dataUrl = "https://private-b47e7-datasetvizualization.apiary-mock.com/model/dj";
-        var makeDiagram = () => {
-            d3.select(".graph-ct").html("");
-
-            if (diagram) diagram.destroy();
-
-            diagram = new Diagram({
-                elkWorkerUrl:'./dist/elk-worker.min.js',
-                editable:document.getElementById("editable").checked,
-                groupColors:{
-                    "admin":"#2196F3",
-                    "default":"#4CAF50"
-                }
-            });
-
-            diagram.render(".graph-ct");
-
-            d3.json(dataUrl, (json) => {
-                diagram.setData(json);
-            });
-
-            diagram.on("nodeSelected", (nodeName)=>{
-                console.log("selected:" +nodeName);
-            })
-
-            diagram.on("nodeDeselected", (nodeName)=>{
-                console.log("deselected:" +nodeName);
-            })
-
-            diagram.on("nodeHighlight", (nodeName, highlighted)=>{
-                console.log("highlighted:" +nodeName + " ("+highlighted+")");
-            })
-
-            d3.select("#selectNode").on("click", ()=>{
-                diagram.selectNode("zsj_d_dwh");
-            })
-
-            var highlighted = false;
-            d3.select("#highlightNode").on("click", ()=>{
-                highlighted = !highlighted;
-                diagram.highlightNode("okres_wfs", highlighted);
-            })
-        }
-
-        makeDiagram("https://private-b47e7-datasetvizualization.apiary-mock.com/model/dj");
-
-        d3.select("#make1").on("click", ()=>{
-            dataUrl = "https://private-b47e7-datasetvizualization.apiary-mock.com/model/dj";
-            makeDiagram();
-        })
-
-        d3.select("#make2").on("click", ()=>{
-            dataUrl = "https://private-b47e7-datasetvizualization.apiary-mock.com/model/roznosy";
-            makeDiagram();
-        })
-
-        d3.select("#make3").on("click", ()=>{
-            dataUrl = "https://private-b47e7-datasetvizualization.apiary-mock.com/model/benu";
-            makeDiagram();
-        })
-
-        d3.select("#editable").on("change", ()=>{
-            makeDiagram();
-        })
-
-    </script>
+    <h1>CleverDiagram</h1>
+    <p>Simple javascript tool to visualize model relationships based on Eclipse Layout Kernel</p>
+    <p>by <a href="https://www.clevermaps.io/"><strong>CleverMaps.io</strong></a>.</p>
+    <a href="example/diagram.html" class="btn">Go to example</a>
 </body>

@@ -1,7 +1,7 @@
 {
   "name": "clever-diagram",
   "version": "1.1.0",
-  "description": "Javascript diagram widget.",
+  "description": "Simple javascript tool to visualize model relationships based on Eclipse Layout Kernel.",
   "main": "dist/clever-diagram-1.1.0.min.js",
   "scripts": {
     "prebuild": "eslint src test",
