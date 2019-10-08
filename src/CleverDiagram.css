@@ -1,43 +1,30 @@
 .diagram {
-    position: relative;
+
 }
 
-.node {
-    position: absolute;
-    display: table;
+.diagram-nodes {
+
+}
+
+.diagram-node {
     cursor: pointer;
-    box-sizing: border-box;
-    padding: 0px 10px;
-    table-layout: fixed;
-    word-break: break-all;
-    overflow:hidden;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
 
-.node-selected {
-    outline:2px solid #546E7A;
-}
-
-.node-highlighted {
-    background-color:#FFEB3B !important;
-}
-
-.node-highlighted>.node-text {
-    background-color:#FFEB3B !important;
-    color:black;
-}
-
-.node-text {
-    text-align: center;
-    display: table-cell;
-    color:white;
+.node-icon {
+    text-anchor: middle;
     user-select: none;
-    vertical-align: middle;
-    font-family: 'Roboto';
-    font-size:13px;
 }
 
-.icon {
-    color:white;
-    margin-right:7px;
+.diagram-edges {
+    pointer-events: none;
+}
+
+.node-skeleton {
+
+}
+
+.node-name {
+    font-family: Roboto, sans-serif;
+    font-weight: 600;
+    user-select: none;
 }

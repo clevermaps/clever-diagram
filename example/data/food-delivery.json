@@ -3,7 +3,8 @@
       {
         "name": "obec_momc_dwh",
         "type": "master",
-        "group": "default"
+        "group": "default",
+        "icon": "\uf1c9"
       },
       {
         "name": "dates",

@@ -9,7 +9,7 @@ let pkg = require('./package.json');
 const cssExportMap = {};
 
 export default {
-  entry: 'src/CleverDiagram.js',
+  entry: 'src/Diagram.js',
   plugins: [
     postcss({
       plugins: [

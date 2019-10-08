@@ -10,14 +10,25 @@ class Example {
     createDiagram() {
         this.diagram = new CleverDiagram({
             elkWorkerUrl:'../dist/elk-worker.min.js',
-            editable:document.getElementById('editable').checked,
             groupColors:{
                 'admin':'#2196F3',
-                'default':'#4CAF50'
-            }
+                'default':'#4CAF50',
+                'projects': 'rgb(181, 19, 254)'
+            },
+            iconFontFamily: 'Material-Design-Iconic-Font',
+            mouseControl: true
         });
 
-        this.diagram.render('.graph-ct');
+        this.diagram.render('.graph-ct')
+            .on('selectNode', (name) => {
+                console.log(`selected node: ${name}`);
+            })
+            .on('deselectNode', (name) => {
+                console.log(`deselected node: ${name}`);
+            })
+            .on('highlightNode', (name) => {
+                console.log(`highlighted node: ${name}`);
+            });
 
         d3.json(data[this.variant].path, json => {
             this.diagram.setData(json);
@@ -32,24 +43,26 @@ class Example {
     }
 
     registerEvents() {
-        this.diagram.on('nodeClick', (nodeName) => {
-            console.log('selected:' +nodeName);
-        });
-
-        this.diagram.on('nodeHighlight', (nodeName, highlighted) => {
-            console.log(`highlighted: ${nodeName} (${highlighted})`);
-        });
-
         let doSelect = false;
         d3.select('#selectNode').on('click', () => {
             doSelect = !doSelect;
-            this.diagram.selectNode(data[this.variant].node, doSelect);
+            if (doSelect) {
+                this.diagram.selectNode(data[this.variant].node);
+            } else {
+                this.diagram.deselectNode(data[this.variant].node);
+            }
+
         });
 
         let doHighlight = false;
         d3.select('#highlightNode').on('click', () => {
             doHighlight = !doHighlight;
-            this.diagram.highlightNode(data[this.variant].node, doHighlight);
+            if (doHighlight) {
+                this.diagram.highlightNode(data[this.variant].node);
+            } else {
+                this.diagram.unhighlightNode(data[this.variant].node);
+            }
+
         });
     }
 }
@@ -61,7 +74,7 @@ const data = {
     },
     foodDelivery: {
         path: 'data/food-delivery.json',
-        node: 'address-points'
+        node: 'orders_dwh'
     },
     leafletDistribution: {
         path: 'data/leaflet-distribution.json',
