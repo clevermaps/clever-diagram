@@ -123,7 +123,7 @@ class DiagramNode extends Component {
     _renderIcon() {
         this._icon = this.container.append("text")
             .attr("x", NODE_GROUP_WIDTH/2)
-            .attr("y", (this._styles.height/2 + ICON_FONT_SIZE/2))
+            .attr("y", (this._styles.height/2 + ICON_FONT_SIZE/2) - 1)
             .attr("class", style['node-icon'])
             .attr("font-family", this._iconFontFamily)
             .attr("font-size", ICON_FONT_SIZE)
@@ -139,7 +139,7 @@ class DiagramNode extends Component {
             .attr("x2", NODE_GROUP_WIDTH)
             .attr("y2", NODE_GROUP_WIDTH)
             .attr("stroke", NODE_STROKE_COLOR)
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 1)
             .attr("opacity", 0);
     }
 
@@ -173,7 +173,7 @@ class DiagramNode extends Component {
             .append("text")
             .text(this._node.name)
             .attr("x", NODE_GROUP_WIDTH + 15)
-            .attr("y", (NODE_HEIGHT/2 + NODE_NAME_FONT_SIZE/2) - 1)
+            .attr("y", (NODE_HEIGHT/2 + NODE_NAME_FONT_SIZE/2) - 2)
             .attr("font-size", NODE_NAME_FONT_SIZE)
             .attr("fill", NODE_NAME_COLOR)
             .attr("class", style["node-name"]);
