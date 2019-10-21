@@ -54,15 +54,15 @@ class DiagramNodes extends Component {
     }
 
     _findEdgesRecursive(edges, names, alreadySearched=[]) {
-        let results = [];
-        names.forEach(name => {
-            if (alreadySearched.indexOf(name) >= 0) {
-                return;
+        let results = names.reduce((acc, cur) => {
+            if (alreadySearched.indexOf(cur) >= 0) {
+                return acc;
             }
 
-            const filteredEdges = edges.filter(edge => edge.start === name);
-            results = results.concat(filteredEdges);
-        });
+            const filteredEdges = edges.filter(edge => edge.start === cur);
+
+            return acc.concat(filteredEdges);
+        }, []);
 
         const namesToFind = results.map(result => result.end);
         alreadySearched = alreadySearched.concat(names);

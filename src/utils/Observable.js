@@ -76,7 +76,7 @@ export default class Observable {
 
 	/**
 	 * @public
-	 * Destorys this observable, removes events and so on
+	 * Destroys this observable, removes events and so on
 	 */
 	destroy() {
 		this._handlers = null;

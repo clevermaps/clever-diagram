@@ -79,9 +79,9 @@ class DiagramNode extends Component {
                 { offset: "1", color: colorDefaultBg, opacity: '1'}
             ])
             .enter().append("stop")
-            .attr("offset", function (d) { return d.offset; })
-            .attr("stop-color", function (d) { return d.color; })
-            .attr("stop-opacity", function (d) { return d.opacity; });
+            .attr("offset", data => data.offset)
+            .attr("stop-color", data => data.color)
+            .attr("stop-opacity", data => data.opacity);
     }
 
     _renderMutedGradient() {
@@ -100,9 +100,9 @@ class DiagramNode extends Component {
                 { offset: "1", color: colorMutedBg, opacity: '1'}
             ])
             .enter().append("stop")
-            .attr("offset", function (d) { return d.offset; })
-            .attr("stop-color", function (d) { return d.color; })
-            .attr("stop-opacity", function (d) { return d.opacity; });
+            .attr("offset", data => data.offset)
+            .attr("stop-color", data => data.color)
+            .attr("stop-opacity", data => data.opacity);
     }
 
     _renderNodeSkeleton(){

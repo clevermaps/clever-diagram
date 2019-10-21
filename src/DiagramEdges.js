@@ -55,7 +55,7 @@ class DiagramEdges extends Component {
 
                         let init = true;
 
-                        (d.bendPoints || []).forEach(function (bendPoint) {
+                        (d.bendPoints || []).forEach(bendPoint => {
 
                             const params = this._getSectionParams(
                                 bendPoint,
