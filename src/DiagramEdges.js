@@ -32,24 +32,63 @@ class DiagramEdges extends Component {
 			.attr("d", "M0,-5L10,0L0,5");
     }
 
-    _renderEdges(data){
+    _renderEdges(data) {
         const layout = data.layout;
         data.edges.forEach((edge, index) => {
             const link = this.container.append("path")
                 .attr("class", "link")
                 .attr("stroke", EDGES_STROKE_COLOR)
                 .attr("stroke-width", 1)
+                .attr("stroke-linejoin", "bevel")
                 .attr("fill", "transparent")
                 .attr("d", () => {
                     const d = layout.edges[index].sections[0];
                     let path = "";
                     if (d.startPoint && d.endPoint) {
-                        path += "M" + d.startPoint.x + " " + d.startPoint.y + " ";
-                        (d.bendPoints || []).forEach(function (bp) {
-                            path += "L" + bp.x + " " + bp.y + " ";
-                        });
-                        path += "L" + d.endPoint.x + " " + d.endPoint.y + " ";
+                        path += `M${d.startPoint.x} ${d.startPoint.y}`;
+
+                        const radius = 6;
+                        let lastPoint = {
+                            x: d.startPoint.x,
+                            y: d.startPoint.y
+                        };
+
+                        let init = true;
+
+                        (d.bendPoints || []).forEach(function (bendPoint) {
+
+                            const params = this._getSectionParams(
+                                bendPoint,
+                                lastPoint,
+                                init,
+                                radius
+                            );
+
+                            const section = this._getSection(params);
+
+                            path += section;
+
+                            lastPoint.x = bendPoint.x;
+                            lastPoint.y = bendPoint.y;
+
+                            init = false;
+
+                        }, this);
+
+                        const isEnd = true;
+                        const params = this._getSectionParams(
+                            d.endPoint,
+                            lastPoint,
+                            init,
+                            radius,
+                            isEnd
+                        );
+
+                        const endSection = this._getSection(params);
+
+                        path += endSection;
                     }
+
                     return path;
                 });
 
@@ -57,6 +96,64 @@ class DiagramEdges extends Component {
                 link.attr("marker-end", "url(#end)");
             }
         });
+    }
+
+    _getSection(params) {
+        const {x, y, init, radius, isEnd} = params;
+
+        let curve = '';
+        let line = '';
+        const lineEndCorrection = isEnd ? 0 : radius;
+
+        if (x.lastRounded === x.rounded && y.lastRounded > y.rounded) {
+            // to top
+            curve = `Q ${x.last} ${y.last} ${x.last} ${y.last - radius} `;
+            line = `L ${x.current} ${y.current + lineEndCorrection} `;
+        } else if (x.lastRounded === x.rounded && y.lastRounded < y.rounded) {
+            // to bottom
+            curve = `Q ${x.last} ${y.last} ${x.last} ${y.last + radius} `;
+            line = `L ${x.current} ${y.current - lineEndCorrection} `;
+        } else if (x.lastRounded < x.rounded && y.lastRounded === y.rounded) {
+            // to right
+            if (!init) {
+                curve = `Q ${x.last} ${y.last} ${x.last + radius} ${y.last} `;
+            }
+            line = `L ${x.current - lineEndCorrection} ${y.current} `;
+        } else if (x.lastRounded > x.rounded && y.lastRounded === y.rounded) {
+            // to left
+            if (!init) {
+                curve = `Q ${x.last} ${y.last} ${x.last - radius} ${y.last} `;
+            }
+            line = `L ${x.current + lineEndCorrection} ${y.current} `;
+        }
+
+        return curve.concat(line);
+    }
+
+    _getSectionParams(
+        point,
+        lastPoint,
+        init,
+        radius,
+        isEnd = false
+    ) {
+        return {
+            x: {
+                current: point.x,
+                last: lastPoint.x,
+                rounded: Math.round(point.x),
+                lastRounded: Math.round(lastPoint.x)
+            },
+            y: {
+                current: point.y,
+                last: lastPoint.y,
+                rounded: Math.round(point.y),
+                lastRounded: Math.round(lastPoint.y)
+            },
+            init,
+            radius,
+            isEnd
+        };
     }
 }
 
