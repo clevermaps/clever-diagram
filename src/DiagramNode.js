@@ -44,6 +44,7 @@ class DiagramNode extends Component {
 
     _renderAll() {
         this._renderGradients();
+        this._renderNodeBaseLayer();
         this._renderNodeSkeleton();
 
         if (this._node.icon) {
@@ -105,7 +106,18 @@ class DiagramNode extends Component {
             .attr("stop-opacity", data => data.opacity);
     }
 
-    _renderNodeSkeleton(){
+    _renderNodeBaseLayer() {
+        this._nodeBaseLayer = this.container
+            .append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", this._styles.width)
+            .attr("height", this._styles.height)
+            .attr("fill", "white")
+            .attr("rx", 5);
+    }
+
+    _renderNodeSkeleton() {
         this._nodeSkeleton = this.container
             .append("rect")
             .attr("x", 0)
