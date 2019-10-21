@@ -201,7 +201,7 @@ class DiagramNodes extends Component {
 
         this.on("deselectNode", (name) => {
             this.deselectNode(name, true);
-		});
+        });
     }
 
     _doHighlighting() {
@@ -211,7 +211,7 @@ class DiagramNodes extends Component {
 
         this.on("unhighlightNode", () => {
             this.unhighlightNode();
-		});
+        });
     }
 
     _getStyles(layout) {

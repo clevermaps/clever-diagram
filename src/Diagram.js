@@ -77,41 +77,41 @@ class Diagram extends Component {
     }
 
     _getElkGraph() {
-		return {
-			"id": "root",
-			properties: this._getRootProperties(),
-			"children": this._dataNodes.map(node => {
-				return {
-					id: node.name,
-					width: this._nodeWidth,
-					height: this._nodeHeight
-				};
-			}),
-			"edges": this._dataEdges.map((edge, index) => {
-				return {
-					id: "edge_" + index,
-					sources: [edge.start],
-					targets: [edge.end]
-				};
-			})
-		};
-	}
+        return {
+            "id": "root",
+            properties: this._getRootProperties(),
+            "children": this._dataNodes.map(node => {
+                return {
+                    id: node.name,
+                    width: this._nodeWidth,
+                    height: this._nodeHeight
+                };
+            }),
+            "edges": this._dataEdges.map((edge, index) => {
+                return {
+                    id: "edge_" + index,
+                    sources: [edge.start],
+                    targets: [edge.end]
+                };
+            })
+        };
+    }
 
-	_getRootProperties(){
-		return {
-			'algorithm': 'layered',
-			'direction':'RIGHT'
-		};
+    _getRootProperties(){
+        return {
+            'algorithm': 'layered',
+            'direction':'RIGHT'
+        };
     }
 
     _setGraphSize(nodes) {
-		const maxHeight = Math.max.apply(Math, nodes.map(node => node.y + node.height));
-		const maxWidth = Math.max.apply(Math, nodes.map(node => node.x + node.width));
+        const maxHeight = Math.max.apply(Math, nodes.map(node => node.y + node.height));
+        const maxWidth = Math.max.apply(Math, nodes.map(node => node.x + node.width));
 
-		this.container.style("width", maxWidth + 10 + "px");
+        this.container.style("width", maxWidth + 10 + "px");
         this.container.style("height", maxHeight + 10 + "px");
         this.container.style("margin", this._diagramMargin + "px");
-	}
+    }
 
     _renderEdges(layout) {
         const data = {
