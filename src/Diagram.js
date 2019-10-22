@@ -71,7 +71,7 @@ class Diagram extends Component {
         return this._elk.layout(graph).then(layout => {
             this._renderNodes(layout);
             this._renderEdges(layout);
-            this._setGraphSize(layout.children);
+            this._setGraphSize(layout.children, layout.edges);
             this._hasRenderedNodes = true;
         });
     }
@@ -104,13 +104,18 @@ class Diagram extends Component {
         };
     }
 
-    _setGraphSize(nodes) {
-        const maxHeight = Math.max.apply(Math, nodes.map(node => node.y + node.height));
+    _setGraphSize(nodes, edges) {
+        const edgesWithBendPoints = edges.flatMap(edge => edge.sections.filter(section => section.bendPoints));
+        const bendPointsYs = edgesWithBendPoints.flatMap(edge => edge.bendPoints.flatMap(bendPoint => bendPoint.y));
+        const maxEdgesY = Math.max.apply(Math, bendPointsYs);
+        const maxNodesY = Math.max.apply(Math, nodes.map(node => node.y + node.height));
+
+        const maxHeight = Math.max(maxEdgesY, maxNodesY);
         const maxWidth = Math.max.apply(Math, nodes.map(node => node.x + node.width));
 
-        this.container.style("width", maxWidth + 10 + "px");
-        this.container.style("height", maxHeight + 10 + "px");
-        this.container.style("margin", this._diagramMargin + "px");
+        this.container.style("width", `${maxWidth + 10}px`);
+        this.container.style("height", `${maxHeight + 10}px`);
+        this.container.style("margin", `${this._diagramMargin}px`);
     }
 
     _renderEdges(layout) {
