@@ -1,331 +1,191 @@
-import Observable from "./utils/Observable";
-import style from "./Diagram.css";
+import style from "./CleverDiagram.css";
 import * as d3 from "d3";
 import * as ELK from "ELK";
+import Component from './Component';
+import DiagramEdges from './DiagramEdges';
+import DiagramNodes from './DiagramNodes';
+import {
+    DIAGRAM_MARGIN,
+    NODE_WIDTH,
+    NODE_HEIGHT,
+    MOUSE_CONTROL
+} from './DiagramDefaults';
 
 /**
  * @class
  * Main Diagram class
  * @param {Object} options
  */
-export default class Diagram {
-	constructor(options) {
-		/**
-		 * @private
-		 * observable handler
-		 */
-		this._observable = new Observable([
-			/**
-			 * @event 
-			 * Fires when node is clicked
-			 * @param {String} node name
-			 */
-			"nodeClick",
-			/**
-			 * @event 
-			 * Fires when node is highlighted
-			 * @param {String} node name
-			 * @param {Boolean} highlighted
-			 */
-			"nodeHighlight"
-		]);
+class Diagram extends Component {
+    constructor({
+        nodeWidth = NODE_WIDTH,
+        nodeHeight = NODE_HEIGHT,
+        groupColors = {},
+        elkWorkerUrl,
+        diagramMargin = DIAGRAM_MARGIN,
+        mouseControl = MOUSE_CONTROL,
+        iconFontFamily
+    }) {
+        super('diagram');
 
-		this._options = options || {};
+        this._nodeWidth = nodeWidth;
+        this._nodeHeight = nodeHeight;
+        this._groupColors = groupColors;
+        this._elkWorkerUrl = elkWorkerUrl;
+        this._diagramMargin = diagramMargin;
+        this._mouseControl = mouseControl;
+        this._iconFontFamily = iconFontFamily;
 
-		if (!options.elkWorkerUrl){
-			throw "ELK worker URL has to be specified";
-		}
+        this._hasRenderedNodes = false;
 
-		this._elk = new ELK({
-			workerUrl: options.elkWorkerUrl
-		});		
+        this._elk = new ELK({
+            workerUrl: this._elkWorkerUrl
+        });
 
-		/**
-		 * @private 
-		 * DOM container for diagram
-		 */
-		this._container = null;
+        this._observable
+            .add("selectNode")
+            .add("deselectNode")
+            .add("highlightNode")
+            .add("unhighlightNode");
+    }
 
-		this._groupColors = options.groupColors || {};
-	}
+    _renderContainer(selector, x = 0, y = 0) {
+        return d3.select(selector).append("svg")
+            .attr("class", style[this.className])
+            .attr("transform", `translate(${x}, ${y})`);
+    }
 
-	/**
-	 * Bind widget event
-	 * @param {String} event event name
-	 * @param {Function} handler event handler
-	 * @returns {Bar} returns this widget instance
-	 */
-	on(eventName, handler) {
-		this._observable.on(eventName, handler);
-		return this;
-	}
+    _setData(container, data) {
+        container.selectAll("*").remove();
 
-	/**
-	 * Unbind widget event
-	 * @param {String} event event name
-	 * @param {Function} [handler] event handler
-	 * @returns {Bar} returns this widget instance
-	 */
-	off(eventName, handler) {
-		this._observable.off(eventName, handler);
-		return this;
-	}
+        this._dataEdges = data.edges || [];
+        this._dataNodes = data.nodes || [];
+        this._data = data;
 
-	/**
-	 * Destroys widget
-	 * @returns {Bar} returns this widget instance
-	 */
-	destroy() {
-		this._observable.destroy();
-		this._el.remove();
-		this._group.remove();
-		return this;
-	}
+        this._renderElk();
+    }
 
-	/**
-	 * Render logic of this widget
-	 * @param {String|DOMElement} selector selector or DOM element 
-	 * @returns {Bar} returns this widget instance
-	 */
-	render(selector) {
-		this._container = d3.select(selector);
+    _renderElk() {
+        const graph = this._getElkGraph();
 
-		this._svg = this._container
-			.append("svg")
-			.style("position", "absolute")
-			.attr("pointer-events", "none");
+        return this._elk.layout(graph).then(layout => {
+            this._renderNodes(layout);
+            this._renderEdges(layout);
+            this._setGraphSize(layout.children, layout.edges);
+            this._hasRenderedNodes = true;
+        });
+    }
 
-		this._group = this._svg.append("g");
+    _getElkGraph() {
+        return {
+            "id": "root",
+            properties: this._getRootProperties(),
+            "children": this._dataNodes.map(node => {
+                return {
+                    id: node.name,
+                    width: this._nodeWidth,
+                    height: this._nodeHeight
+                };
+            }),
+            "edges": this._dataEdges.map((edge, index) => {
+                return {
+                    id: "edge_" + index,
+                    sources: [edge.start],
+                    targets: [edge.end]
+                };
+            })
+        };
+    }
 
-		// define an arrow head
-		this._group.append("svg:defs")
-			.append("svg:marker")
-			.attr("id", "end")
-			.attr("viewBox", "0 -5 10 10")
-			.attr("refX", 10)
-			.attr("refY", 0)
-			.attr("markerWidth", 4)        // marker settings
-			.attr("markerHeight", 4)
-			.attr("orient", "auto")
-			.style("fill", "#546E7A")
-			.style("stroke-opacity", 0.6)  // arrowhead color
-			.append("svg:path")
-			.attr("d", "M0,-5L10,0L0,5");
+    _getRootProperties(){
+        return {
+            'algorithm': 'layered',
+            'direction':'RIGHT'
+        };
+    }
 
-		this._el = this._container.append("div").classed(style.diagram, true);
-	}
+    _setGraphSize(nodes, edges) {
+        const edgesWithBendPoints = edges.flatMap(edge => edge.sections.filter(section => section.bendPoints));
+        const bendPointsYs = edgesWithBendPoints.flatMap(edge => edge.bendPoints.flatMap(bendPoint => bendPoint.y));
+        const maxEdgesY = Math.max.apply(Math, bendPointsYs);
+        const maxNodesY = Math.max.apply(Math, nodes.map(node => node.y + node.height));
 
-	_getRootProperties(){
-		return { 
-			'algorithm': 'layered',
-			'direction':'RIGHT'
-		}
-	}
+        const maxHeight = Math.max(maxEdgesY, maxNodesY);
+        const maxWidth = Math.max.apply(Math, nodes.map(node => node.x + node.width));
 
-	_getElkGraph() {
-		return {
-			"id": "root",
-			properties: this._getRootProperties(),
-			"children": this._nodes.map(node => { 
-				return {
-					id: node.name,
-					width: 200,
-					height: 50
-				}
-			}),
-			"edges": this._edges.map((edge, index) => {
-				return {
-					id: "edge_" + index,
-					sources: [edge.start],
-					targets: [edge.end]
-				}
-			})
-		}
-	}
+        this.container.style("width", `${maxWidth + 10}px`);
+        this.container.style("height", `${maxHeight + 10}px`);
+        this.container.style("margin", `${this._diagramMargin}px`);
+    }
 
-	_setGraphSize(nodes) {
-		var maxHeight = Math.max.apply(Math, nodes.map(node => node.y + node.height));
-		var maxWidth = Math.max.apply(Math, nodes.map(node => node.x + node.width));
+    _renderEdges(layout) {
+        const data = {
+            layout,
+            edges: this._dataEdges
+        };
+        this._edges = new DiagramEdges();
+        this._edges.render(this.container.node());
+        this._edges.setData(data);
+    }
 
-		this._el.style("width", maxWidth + "px");
-		this._el.style("height", maxHeight + "px");
+    _renderNodes(layout) {
+        const data = {
+            nodes: this._data.nodes,
+            edges: this._data.edges,
+            selected: this._data.selected,
+            layout,
+            groupColors: this._groupColors
+        };
+        this._nodes = new DiagramNodes({
+            nodeWidth: this._nodeWidth,
+            mouseControl: this._mouseControl,
+            iconFontFamily: this._iconFontFamily
+        });
 
-		this._svg.attr("width", maxWidth);
-		this._svg.attr("height", maxHeight);
-	}
+        this._nodes.render(this.container.node())
+            .on("selectNode", (name) => {
+                this._observable.fire("selectNode", name);
+            })
+            .on("deselectNode", (name, highlightDeselected) => {
+                this._observable.fire("deselectNode", name, highlightDeselected);
+            })
+            .on("highlightNode", (name) => {
+                this._observable.fire("highlightNode", name);
+            })
+            .on("unhighlightNode", (name) => {
+                this._observable.fire("unhighlightNode", name);
+            });
 
-	/**
-	 * Renders nodes
-	 */
-	_renderNodes() {
-		const graph = this._getElkGraph();
+        this._nodes.setData(data);
+    }
 
-		return this._elk.layout(graph).then(layout => {
-			this._nodes.forEach((node, i) => {
-				var styles = {
-					top: layout.children[i].y,
-					left: layout.children[i].x,
-					width: layout.children[i].width,
-					height: layout.children[i].height
-				};
+    hasRenderedNodes() {
+        return this._hasRenderedNodes;
+    }
 
-				this._renderNode(node, styles);
-			});
+    selectNode(name) {
+        this._nodes.selectNode(name);
+    }
 
-			this._renderEdges(layout);
-			this._setGraphSize(layout.children);
-		});
-	}
+    deselectNode(name) {
+        this._nodes.deselectNode(name);
+    }
 
+    highlightNode(name) {
+        this._nodes.highlightNode(name);
+    }
 
-/**
- * @public
- * Selects node 
- * @param nodeName
- * @param selected
- */
-selectNode(nodeName, selected){
-	var el = document.getElementById(nodeName);
-	if (!el) throw "Node " + nodeName + " doesn't exist or graph hasn't been rendered yet";
+    unhighlightNode() {
+        this._nodes.unhighlightNode();
+    }
 
-	var nodeEl = d3.select(el);
-
-	var selectedClass = style["node-selected"];
-
-	if (selected) {
-		d3.select("." + selectedClass).classed(selectedClass, false);
-		nodeEl.classed(selectedClass, true);
-
-		this._selectedNodeName = nodeName;
-	} else {
-		d3.select("." + selectedClass).classed(selectedClass, false);
-	}
+    _clearData() {
+        this._dataEdges = null;
+        this._dataNodes = null;
+        this._edges = null;
+        this._nodes = null;
+        this._elk = null;
+    }
 }
 
-/**
- * @public
- * Highlights node 
- * @param nodeName
- * @param highlighted
- */
-highlightNode(nodeName, highlighted){
-	var nodeEl = d3.select("#" + nodeName);
-	var highlightedClass = style["node-highlighted"];
-
-	if (this._dragging && d3.event.relatedTarget && d3.event.relatedTarget.tagName == "path") {
-		return;
-	}
-
-	if (highlighted) {
-		d3.select("." + highlightedClass).classed(highlightedClass, false);
-		nodeEl.classed(highlightedClass, true);
-		this._observable.fire("nodeHighlight", nodeName, highlighted);
-	} else {
-		d3.select("." + highlightedClass).classed(highlightedClass, false);
-		this._observable.fire("nodeHighlight", nodeName, highlighted);
-	}
-}
-
-_onMouseDown(nodeName){
-	this._dragging = true;
-	// save box on mouse down so we can compare on mouseup
-	this._mouseDownBB = document.getElementById(nodeName).getBoundingClientRect();
-}
-
-_onMouseUp(nodeName){
-	var bb = document.getElementById(nodeName).getBoundingClientRect();
-	// only call select when bounding box is same
-	if (this._mouseDownBB && this._mouseDownBB.top == bb.top && this._mouseDownBB.left == bb.left) {
-		this._observable.fire("nodeClick", nodeName);
-	}
-	this._dragging = false;
-}
-/**
- * Renders node 
- * @param node
- */
-_renderNode(node, styles){
-	var color = this._groupColors[node.group] || "#2196F3";
-	var styleStr = Object.keys(styles).map(style => style + ":" + styles[style] + "px").join(";") + "; background-color:" + color;
-	var nodeEl = this._el
-		.append("div")
-		.attr("style", styleStr)
-		.attr("class", style.node)
-		.attr("id", node.name)
-		.on("mousedown", () => {
-			this._onMouseDown(node.name);
-		})
-		.on("mouseup", () => {
-			this._onMouseUp(node.name);
-		})
-		.on("mouseover", () => {
-			this.highlightNode(node.name, true);
-		}).on("mouseout", () => {
-			this.highlightNode(node.name, false);
-		});
-
-	var textEl = nodeEl
-		.append("div")
-		.attr("class", style["node-text"])
-
-	textEl
-		.append("i")
-		.attr("class", "zmdi "+node.icon || "")
-		.classed(style["icon"],true )
-
-	textEl.append("span").html(node.name)
-}
-
-_getEdgeOverlay(edge){
-	return {
-		"arrow": [["PlainArrow", { location: 1, width: 10, length: 10 }]],
-		"link": [],
-	}[edge.type]
-}
-
-/**
- * Renders edges
- */
-_renderEdges(layout){
-	this._edges.forEach((edge, i) => {
-		var link = this._group.append("path")
-			.attr("class", "link")
-			.attr("stroke", "#546E7A")
-			.attr("stroke-width", 2)
-			.attr("fill", "transparent")
-			.attr("d", () => {
-				var d = layout.edges[i].sections[0];
-				var path = "";
-				if (d.startPoint && d.endPoint) {
-					path += "M" + d.startPoint.x + " " + d.startPoint.y + " ";
-					(d.bendPoints || []).forEach(function (bp) {
-						path += "L" + bp.x + " " + bp.y + " ";
-					});
-					path += "L" + d.endPoint.x + " " + d.endPoint.y + " ";
-				}
-				return path;
-			})
-
-		if (edge.type == "arrow") {
-			link.attr("marker-end", "url(#end)");
-		}
-
-	});
-}
-
-/**
- * Sets widget data
- * @param {Array} data
- * @returns {Bar} returns this widget instance 
- */
-setData(data) {
-	if (!this._container) throw "Diagram is not rendered"
-
-	this._el.html("");
-
-	this._nodes = data.nodes || [];
-	this._edges = data.edges || [];
-
-	return this._renderNodes();
-}
-}
+export default Diagram;

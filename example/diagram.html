@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
+    <script src="../dist/elk-api.js"></script>
+    <script src="../dist/clever-diagram-1.1.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css" rel="stylesheet" >
+</head>
+
+<style>
+    html {
+        background-image: url("../images/bg.png");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    .graph-ct {
+        position: absolute;
+    }
+
+    .m-10 {
+        margin: 10px;
+    }
+</style>
+
+<body>
+    <div class="m-10">
+        <label for="data-select">Select data</label>
+        <select id="data-select">
+            <option value="foodDelivery">Food Delivery</option>
+            <option value="healthServices">Health services</option>
+            <option value="leafletDistribution">Leaflet distribution</option>
+        </select>
+    </div>
+    <div class="m-10">
+        <button id="selectNode">Toggle select</button>
+        <button id="highlightNode">Toggle highlight</button>
+    </div>
+
+
+    <div class="graph-ct"></div>
+
+    <script src="scripts.js"></script>
+</body>

@@ -1,0 +1,30 @@
+.diagram {
+
+}
+
+.diagram-nodes {
+
+}
+
+.diagram-node {
+    cursor: pointer;
+}
+
+.node-icon {
+    text-anchor: middle;
+    user-select: none;
+}
+
+.diagram-edges {
+    pointer-events: none;
+}
+
+.node-skeleton {
+
+}
+
+.node-name {
+    font-family: Roboto, sans-serif;
+    font-weight: 600;
+    user-select: none;
+}

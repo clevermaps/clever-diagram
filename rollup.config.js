@@ -35,7 +35,7 @@ export default {
     {
       dest: pkg.main,
       format: 'umd',
-      moduleName: 'Diagram',
+      moduleName: 'CleverDiagram',
       sourceMap: true
     }
   ]

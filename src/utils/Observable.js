@@ -15,60 +15,72 @@ export default class Observable {
         },{});
     }
 
-	/**
-	 * @public
-	 * Bind event
-	 * @param {String} event event name
-	 * @param {Function} handler event handler
-	 */
+    /**
+     * @public
+     * Bind event
+     * @param {String} event event name
+     * @param {Function} handler event handler
+     */
     on(event, handler) {
         if (!(event in this._handlers)) throw "No such event: " + event;
-		this._handlers[event].push(handler);
-		return this;
+        this._handlers[event].push(handler);
+        return this;
     }
 
-	/**
-	 * @public
-	 * Unbind event
-	 * @param {String} event event name
-	 * @param {Function} [handler] event handler, optional
-	 */
+    /**
+     * @public
+     * Unbind event
+     * @param {String} event event name
+     * @param {Function} [handler] event handler, optional
+     */
     off(event, handler) {
         if (!(event in this._handlers)) throw "No such event: " + event;
-		if (!handler) {
-			this._handlers[event] = [];
-		} else {
-			var handlers = this._handlers[event];
-			var index = handlers.indexOf(handler);
-			if (index != -1){
-				handlers.splice(index, 1);
-			}
-		}
-		return this;
+        if (!handler) {
+            this._handlers[event] = [];
+        } else {
+            var handlers = this._handlers[event];
+            var index = handlers.indexOf(handler);
+            if (index != -1){
+                handlers.splice(index, 1);
+            }
+        }
+        return this;
     }
 
-	/**
-	 * @public
-	 * Fire widget event
-	 * @param {String} event event name
-	 * @param {*} ...args event arguments
-	 */
-	fire(event, ...args) {
-		if (!(event in this._handlers)) throw "No such event: " + event;
-		var handlers = this._handlers[event];
-		for (var i = 0; i < handlers.length; i++) {
-			handlers[i].apply(this, args);
-		}
-		return this;
+    /**
+     * @public
+     * Add new event to be handled
+     * @param {String} event
+     */
+    add(event) {
+        if (!(event in this._handlers)) {
+            this._handlers[event] = [];
+        }
+        return this;
     }
 
-	/**
-	 * @public
-	 * Destorys this observable, removes events and so on 
-	 */
-	destroy() {
-		this._handlers = null;
-		return this;
+    /**
+     * @public
+     * Fire widget event
+     * @param {String} event event name
+     * @param {*} ...args event arguments
+     */
+    fire(event, ...args) {
+        if (!(event in this._handlers)) throw "No such event: " + event;
+        var handlers = this._handlers[event];
+        for (var i = 0; i < handlers.length; i++) {
+            handlers[i].apply(this, args);
+        }
+        return this;
     }
-	
+
+    /**
+     * @public
+     * Destroys this observable, removes events and so on
+     */
+    destroy() {
+        this._handlers = null;
+        return this;
+    }
+
 }

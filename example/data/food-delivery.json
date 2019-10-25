@@ -1,0 +1,262 @@
+{
+    "nodes": [
+      {
+        "name": "obec_momc_dwh",
+        "type": "master",
+        "group": "default",
+        "icon": "\uf1c9"
+      },
+      {
+        "name": "dates",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "address-points",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "restaurant_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "visits",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "cooldowns",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "zones_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "orders_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "kraj_wfs",
+        "type": "slave",
+        "group": "projects"
+      },
+      {
+        "name": "mestske_casti_wfs",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "okres_wfs",
+        "type": "slave",
+        "group": "projects"
+      },
+      {
+        "name": "orp_wfs",
+        "type": "slave",
+        "group": "projects"
+      },
+      {
+        "name": "obec_momc_wfs",
+        "type": "slave",
+        "group": "projects"
+      },
+      {
+        "name": "obec_wfs",
+        "type": "slave",
+        "group": "projects"
+      },
+      {
+        "name": "cast_obec_wfs",
+        "type": "slave",
+        "group": "projects"
+      },
+      {
+        "name": "zsj_d_wfs",
+        "type": "slave",
+        "group": "projects"
+      },
+      {
+        "name": "orp_dwh",
+        "type": "master",
+        "group": "projects"
+      },
+      {
+        "name": "okres_dwh",
+        "type": "master",
+        "group": "projects"
+      },
+      {
+        "name": "obec_dwh",
+        "type": "master",
+        "group": "projects"
+      },
+      {
+        "name": "cast_obec_dwh",
+        "type": "master",
+        "group": "projects"
+      },
+      {
+        "name": "zsj_d_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "demografie_dwh",
+        "type": "master",
+        "group": "projects"
+      },
+      {
+        "name": "mestske_casti_dwh",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "zones_wfs",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "top_cover_dwh",
+        "type": "master",
+        "group": "default"
+      }
+    ],
+    "edges": [
+      {
+        "start": "visits",
+        "end": "restaurant_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "visits",
+        "end": "dates",
+        "type": "arrow"
+      },
+      {
+        "start": "cooldowns",
+        "end": "dates",
+        "type": "arrow"
+      },
+      {
+        "start": "cooldowns",
+        "end": "restaurant_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "zones_dwh",
+        "end": "restaurant_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "orders_dwh",
+        "end": "restaurant_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "orders_dwh",
+        "end": "zsj_d_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "orders_dwh",
+        "end": "dates",
+        "type": "arrow"
+      },
+      {
+        "start": "orders_dwh",
+        "end": "zones_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "zsj_d_dwh",
+        "end": "okres_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "zsj_d_dwh",
+        "end": "orp_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "zsj_d_dwh",
+        "end": "obec_momc_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "zsj_d_dwh",
+        "end": "obec_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "zsj_d_dwh",
+        "end": "cast_obec_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "zsj_d_dwh",
+        "end": "mestske_casti_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "demografie_dwh",
+        "end": "zsj_d_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "top_cover_dwh",
+        "end": "restaurant_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "top_cover_dwh",
+        "end": "mestske_casti_dwh",
+        "type": "arrow"
+      },
+      {
+        "start": "mestske_casti_dwh",
+        "end": "mestske_casti_wfs",
+        "type": "line"
+      },
+      {
+        "start": "okres_dwh",
+        "end": "okres_wfs",
+        "type": "line"
+      },
+      {
+        "start": "orp_dwh",
+        "end": "orp_wfs",
+        "type": "line"
+      },
+      {
+        "start": "obec_momc_dwh",
+        "end": "obec_momc_wfs",
+        "type": "line"
+      },
+      {
+        "start": "obec_dwh",
+        "end": "obec_wfs",
+        "type": "line"
+      },
+      {
+        "start": "cast_obec_dwh",
+        "end": "cast_obec_wfs",
+        "type": "line"
+      },
+      {
+        "start": "zsj_d_dwh",
+        "end": "zsj_d_wfs",
+        "type": "line"
+      },
+      {
+        "start": "zones_dwh",
+        "end": "zones_wfs",
+        "type": "line"
+      }
+    ]
+  }

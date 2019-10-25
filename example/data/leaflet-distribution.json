@@ -1,0 +1,181 @@
+{
+    "nodes": [
+      {
+        "name": "flyers-neighborhood-old",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "flyers-mix",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "flyers-neighborhood",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "cast_obce",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "mc_cast_obce",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "mc_mix_mc_obec",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "mc_zsj_d",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "obyvatele_m2",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "schranky_m2",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "zakaznici_m2",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "kampan_m2",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "mc_obyvatele_m2",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "mc_schranky_m2",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "mc_zakaznici_m2",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "mc_kampan_m2",
+        "type": "master",
+        "group": "default"
+      },
+      {
+        "name": "address-points",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "prodejny-teta",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "prodejny-top",
+        "type": "slave",
+        "group": "default"
+      },
+      {
+        "name": "konkurence",
+        "type": "slave",
+        "group": "default"
+      }
+    ],
+    "edges": [
+      {
+        "start": "mc_zsj_d",
+        "end": "mc_mix_mc_obec",
+        "type": "arrow"
+      },
+      {
+        "start": "mc_zsj_d",
+        "end": "mc_cast_obce",
+        "type": "arrow"
+      },
+      {
+        "start": "kampan_m2",
+        "end": "cast_obce",
+        "type": "arrow"
+      },
+      {
+        "start": "kampan_m2",
+        "end": "schranky_m2",
+        "type": "arrow"
+      },
+      {
+        "start": "kampan_m2",
+        "end": "obyvatele_m2",
+        "type": "arrow"
+      },
+      {
+        "start": "kampan_m2",
+        "end": "zakaznici_m2",
+        "type": "arrow"
+      },
+      {
+        "start": "mc_kampan_m2",
+        "end": "mc_zsj_d",
+        "type": "arrow"
+      },
+      {
+        "start": "mc_kampan_m2",
+        "end": "mc_schranky_m2",
+        "type": "arrow"
+      },
+      {
+        "start": "mc_kampan_m2",
+        "end": "mc_obyvatele_m2",
+        "type": "arrow"
+      },
+      {
+        "start": "mc_kampan_m2",
+        "end": "mc_zakaznici_m2",
+        "type": "arrow"
+      },
+      {
+        "start": "flyers-neighborhood",
+        "end": "flyers-neighborhood-old",
+        "type": "line"
+      },
+      {
+        "start": "mc_mix_mc_obec",
+        "end": "flyers-mix",
+        "type": "line"
+      },
+      {
+        "start": "flyers-neighborhood-old",
+        "end": "flyers-neighborhood",
+        "type": "line"
+      },
+      {
+        "start": "prodejny-top",
+        "end": "prodejny-teta",
+        "type": "line"
+      },
+      {
+        "start": "prodejny-teta",
+        "end": "prodejny-top",
+        "type": "line"
+      },
+      {
+        "start": "prodejny-teta",
+        "end": "konkurence",
+        "type": "line"
+      }
+    ]
+  }
