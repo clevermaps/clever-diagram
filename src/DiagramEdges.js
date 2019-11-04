@@ -45,23 +45,23 @@ class DiagramEdges extends Component {
                     const d = layout.edges[index].sections[0];
                     let path = "";
                     if (d.startPoint && d.endPoint) {
-                        path += `M${d.startPoint.x} ${d.startPoint.y}`;
+                        path += `M${d.startPoint.x} ${d.startPoint.y} `;
 
-                        const radius = 6;
+                        const defaultRadius = 6;
                         let lastPoint = {
                             x: d.startPoint.x,
                             y: d.startPoint.y
                         };
 
-                        let init = true;
+                        (d.bendPoints || []).forEach((bendPoint, index) => {
 
-                        (d.bendPoints || []).forEach(bendPoint => {
+                            const nextPoint = d.bendPoints[index + 1] || d.endPoint;
 
                             const params = this._getSectionParams(
                                 bendPoint,
                                 lastPoint,
-                                init,
-                                radius
+                                nextPoint,
+                                defaultRadius
                             );
 
                             const section = this._getSection(params);
@@ -71,16 +71,15 @@ class DiagramEdges extends Component {
                             lastPoint.x = bendPoint.x;
                             lastPoint.y = bendPoint.y;
 
-                            init = false;
-
                         }, this);
 
                         const isEnd = true;
+                        const nextPoint = {};
                         const params = this._getSectionParams(
                             d.endPoint,
                             lastPoint,
-                            init,
-                            radius,
+                            nextPoint,
+                            defaultRadius,
                             isEnd
                         );
 
@@ -99,59 +98,88 @@ class DiagramEdges extends Component {
     }
 
     _getSection(params) {
-        const {x, y, init, radius, isEnd} = params;
+        const {x, y, defaultRadius, isEnd} = params;
 
         let curve = '';
         let line = '';
+        let radius = defaultRadius;
+
+        const diff = {
+            lastX: x.rounded - x.lastRounded,
+            lastY: y.rounded - y.lastRounded,
+            nextX: x.nextRounded - x.rounded,
+            nextY: y.nextRounded - y.rounded
+        };
+
+        Object.keys(diff).forEach(key => {
+            const abs = Math.abs(diff[key]);
+            if (abs && abs < radius) {
+                radius = abs / 2;
+            }
+        });
+
         const lineEndCorrection = isEnd ? 0 : radius;
 
-        if (x.lastRounded === x.rounded && y.lastRounded > y.rounded) {
-            // to top
-            curve = `Q ${x.last} ${y.last} ${x.last} ${y.last - radius} `;
-            line = `L ${x.current} ${y.current + lineEndCorrection} `;
-        } else if (x.lastRounded === x.rounded && y.lastRounded < y.rounded) {
-            // to bottom
-            curve = `Q ${x.last} ${y.last} ${x.last} ${y.last + radius} `;
-            line = `L ${x.current} ${y.current - lineEndCorrection} `;
-        } else if (x.lastRounded < x.rounded && y.lastRounded === y.rounded) {
+        // DRAW LINE
+        if (diff.lastX > 0) {
             // to right
-            if (!init) {
-                curve = `Q ${x.last} ${y.last} ${x.last + radius} ${y.last} `;
-            }
             line = `L ${x.current - lineEndCorrection} ${y.current} `;
-        } else if (x.lastRounded > x.rounded && y.lastRounded === y.rounded) {
+        } else if (diff.lastX < 0) {
             // to left
-            if (!init) {
-                curve = `Q ${x.last} ${y.last} ${x.last - radius} ${y.last} `;
-            }
             line = `L ${x.current + lineEndCorrection} ${y.current} `;
+        } else if (diff.lastY > 0) {
+            // to bottom
+            line = `L ${x.current} ${y.current - lineEndCorrection} `;
+        } else if (diff.lastY < 0) {
+            // to top
+            line = `L ${x.current} ${y.current + lineEndCorrection} `;
         }
 
-        return curve.concat(line);
+        // DRAW CURVE
+        if (!isEnd) {
+            if (diff.nextY > 0) {
+                // to bottom
+                curve = `Q ${x.current} ${y.current} ${x.current} ${y.current + radius} `;
+            } else if (diff.nextY < 0) {
+                // to top
+                curve = `Q ${x.current} ${y.current} ${x.current} ${y.current - radius} `;
+            } else if (diff.nextX < 0) {
+                // to left
+                curve = `Q ${x.current} ${y.current} ${x.current - radius} ${y.current} `;
+            } else if (diff.nextX > 0) {
+                // to right
+                curve = `Q ${x.current} ${y.current} ${x.current + radius} ${y.current} `;
+            }
+        }
+
+        return line.concat(curve);
     }
 
     _getSectionParams(
         point,
         lastPoint,
-        init,
-        radius,
+        nextPoint,
+        defaultRadius,
         isEnd = false
     ) {
         return {
             x: {
                 current: point.x,
                 last: lastPoint.x,
+                next: nextPoint.x,
                 rounded: Math.round(point.x),
-                lastRounded: Math.round(lastPoint.x)
+                lastRounded: Math.round(lastPoint.x),
+                nextRounded: Math.round(nextPoint.x)
             },
             y: {
                 current: point.y,
                 last: lastPoint.y,
+                next: nextPoint.y,
                 rounded: Math.round(point.y),
-                lastRounded: Math.round(lastPoint.y)
+                lastRounded: Math.round(lastPoint.y),
+                nextRounded: Math.round(nextPoint.y)
             },
-            init,
-            radius,
+            defaultRadius,
             isEnd
         };
     }
