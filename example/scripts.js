@@ -8,6 +8,13 @@ class Example {
     }
 
     createDiagram() {
+        const zoomable = true;
+
+        if (!zoomable) {
+            const wrapper = document.querySelector('.graph-ct');
+            wrapper.classList.add('scrolling');
+        }
+
         this.diagram = new CleverDiagram({
             elkWorkerUrl:'../dist/elk-worker.min.js',
             groupColors:{
@@ -16,7 +23,8 @@ class Example {
                 'projects': 'rgb(181, 19, 254)'
             },
             iconFontFamily: 'Material-Design-Iconic-Font',
-            mouseControl: true
+            mouseControl: true,
+            zoomable
         });
 
         this.diagram.render('.graph-ct')
@@ -28,6 +36,9 @@ class Example {
             })
             .on('highlightNode', (name) => {
                 console.log(`highlighted node: ${name}`);
+            })
+            .on('zoom', (scale) => {
+                console.log(`zoom scale: ${scale}`);
             });
 
         d3.json(data[this.variant].path, json => {
@@ -51,7 +62,6 @@ class Example {
             } else {
                 this.diagram.deselectNode(data[this.variant].node);
             }
-
         });
 
         let doHighlight = false;
@@ -62,7 +72,18 @@ class Example {
             } else {
                 this.diagram.unhighlightNode(data[this.variant].node);
             }
+        });
 
+        d3.select('#zoomIn').on('click', () => {
+            this.diagram.zoomIn();
+        });
+
+        d3.select('#zoomOut').on('click', () => {
+            this.diagram.zoomOut();
+        });
+
+        d3.select('#fullExtent').on('click', () => {
+            this.diagram.fullExtent();
         });
     }
 }

@@ -1,5 +1,13 @@
 .diagram {
+}
 
+.zoomable {
+    cursor: grab;
+    overflow: visible;
+}
+
+.animate {
+    transition: transform 200ms ease-in-out;;
 }
 
 .diagram-nodes {
@@ -16,7 +24,6 @@
 }
 
 .diagram-edges {
-    pointer-events: none;
 }
 
 .node-skeleton {
