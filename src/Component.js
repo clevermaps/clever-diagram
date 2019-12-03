@@ -103,9 +103,9 @@ class Component {
         if (!this.isRendered()) {
             throw "Can't call setData() when component is not rendered, please call .render() first.";
         }
-        this._setData(this._container, data, this._lastData);
         this._lastData = Object.assign({}, this._lastData, data);
-        return this;
+
+        return this._setData(this._container, data, this._lastData);
     }
 
 

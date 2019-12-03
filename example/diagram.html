@@ -20,6 +20,20 @@
 
     .graph-ct {
         position: absolute;
+        left: 10px;
+        width: 1000px;
+        height: 600px;
+        border: 2px solid grey;
+        overflow: hidden;
+    }
+
+    .graph-ct.scrolling {
+        overflow: auto;
+    }
+
+    svg {
+        width: 1000px;
+        height: 600px;
     }
 
     .m-10 {
@@ -39,6 +53,9 @@
     <div class="m-10">
         <button id="selectNode">Toggle select</button>
         <button id="highlightNode">Toggle highlight</button>
+        <button id="zoomIn">Zoom in</button>
+        <button id="zoomOut">Zoom out</button>
+        <button id="fullExtent">Full extent</button>
     </div>
 
 
