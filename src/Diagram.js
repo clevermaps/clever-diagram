@@ -199,9 +199,10 @@ class Diagram extends Component {
 
         const source = d3.event.sourceEvent;
         const isPan = source && source.type === 'mousemove';
+        const isTouch = source && source.ctrlKey;
         this._currentScale = d3.event.transform.k;
 
-        if (isPan) {
+        if (isPan || isTouch) {
             this._container.classed(style.animate, false);
         } else {
             this._container.classed(style.animate, true);
