@@ -47,7 +47,7 @@ class Example {
                 console.log(`zoom scale: ${scale}`);
             });
 
-        d3.json(data[this.variant].path, json => {
+        d3.json(data[this.variant].path).then(json => {
             this.diagram.setData(json);
         });
 

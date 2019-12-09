@@ -6,10 +6,6 @@
     overflow: visible;
 }
 
-.animate {
-    transition: transform 200ms ease-in-out;;
-}
-
 .diagram-nodes {
 
 }

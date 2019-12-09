@@ -40,6 +40,7 @@ class Diagram extends Component {
 
         this._hasRenderedNodes = false;
         this._currentScale = 1;
+        this._transitionDuration = 200;
 
         this._elk = new ELK({
             workerUrl: this._elkWorkerUrl
@@ -196,18 +197,7 @@ class Diagram extends Component {
 
     _zoomHandler() {
         this._observable.fire("zoom", d3.event.transform.k);
-
-        const source = d3.event.sourceEvent;
-        const isPan = source && source.type === 'mousemove';
-        const isTouch = source && source.ctrlKey;
         this._currentScale = d3.event.transform.k;
-
-        if (isPan || isTouch) {
-            this._container.classed(style.animate, false);
-        } else {
-            this._container.classed(style.animate, true);
-        }
-
         this._container.attr("transform", d3.event.transform);
     }
 
@@ -286,7 +276,10 @@ class Diagram extends Component {
             return;
         }
         const targetScale = this._currentScale + 0.1;
-        this._zoom.scaleTo(this._svgContainer, targetScale);
+        this._zoom.scaleTo(
+            this._svgContainer.transition().duration(this._transitionDuration),
+            targetScale
+        );
     }
 
     zoomOut() {
@@ -294,14 +287,20 @@ class Diagram extends Component {
             return;
         }
         const targetScale = this._currentScale - 0.1;
-        this._zoom.scaleTo(this._svgContainer, targetScale);
+        this._zoom.scaleTo(
+            this._svgContainer.transition().duration(this._transitionDuration),
+            targetScale
+        );
     }
 
     fullExtent() {
         if (!this._zoomable) {
             return;
         }
-        this._zoom.scaleTo(this._svgContainer, this._zoomOutScale);
+        this._zoom.scaleTo(
+            this._svgContainer.transition().duration(this._transitionDuration),
+            this._zoomOutScale
+        );
     }
 
     getZoomScaleExtent() {
