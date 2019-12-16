@@ -5,7 +5,6 @@ import Component from './Component';
 import DiagramEdges from './DiagramEdges';
 import DiagramNodes from './DiagramNodes';
 import {
-    DIAGRAM_MARGIN,
     NODE_WIDTH,
     NODE_HEIGHT,
     MOUSE_CONTROL
@@ -22,7 +21,6 @@ class Diagram extends Component {
         nodeHeight = NODE_HEIGHT,
         groupColors = {},
         elkWorkerUrl,
-        diagramMargin = DIAGRAM_MARGIN,
         mouseControl = MOUSE_CONTROL,
         iconFontFamily,
         zoomable = true
@@ -33,7 +31,6 @@ class Diagram extends Component {
         this._nodeHeight = nodeHeight;
         this._groupColors = groupColors;
         this._elkWorkerUrl = elkWorkerUrl;
-        this._diagramMargin = diagramMargin;
         this._mouseControl = mouseControl;
         this._iconFontFamily = iconFontFamily;
         this._zoomable = zoomable;
@@ -55,7 +52,7 @@ class Diagram extends Component {
     }
 
     _renderContainer(selector, x = 0, y = 0) {
-        this._wrapper = d3.select(selector).node();
+        this._wrapper = d3.select(selector);
         this._svgContainer = d3.select(selector).append("svg");
 
         return this._svgContainer.append("g")
@@ -79,11 +76,13 @@ class Diagram extends Component {
         return this._elk.layout(graph).then(layout => {
             this._renderEdges(layout);
             this._renderNodes(layout);
-            const {maxWidth, maxHeight} = this._getGraphSize(layout.children, layout.edges);
+            this._graphSize = this._getGraphSize(layout.children, layout.edges);
+
             if (!this._zoomable) {
-                this._setGraphSize(maxWidth, maxHeight);
+                this._setGraphSize(this._graphSize);
             } else {
-                this._doZoom(maxWidth, maxHeight);
+                this._doZoom(this._graphSize);
+                this._centerGraph();
             }
 
             this._hasRenderedNodes = true;
@@ -124,42 +123,50 @@ class Diagram extends Component {
         const maxEdgesY = Math.max.apply(Math, bendPointsYs);
         const maxNodesY = Math.max.apply(Math, nodes.map(node => node.y + node.height));
 
-        const maxHeight = Math.max(maxEdgesY, maxNodesY) + 20;
-        const maxWidth = Math.max.apply(Math, nodes.map(node => node.x + node.width)) + 20;
+        const height = Math.max(maxEdgesY, maxNodesY) + 10;
+        const width = Math.max.apply(Math, nodes.map(node => node.x + node.width)) + 10;
 
-        return {maxWidth, maxHeight};
+        return {width, height};
     }
 
-    _setGraphSize(width, height) {
+    _setGraphSize({width, height}) {
         this._svgContainer.style("width", `${width}px`);
         this._svgContainer.style("height", `${height}px`);
     }
 
-    _doZoom(maxWidth, maxHeight) {
+    _centerGraph() {
+        this._zoom.translateTo(this._svgContainer, 0, 0);
+    }
+
+    _doZoom(graphSize) {
+        const svgSize = this._svgContainer.node().getBoundingClientRect();
+
         this._svgContainer.classed(style.zoomable, true);
 
-        const svgDimensions = this._svgContainer.node().getBoundingClientRect();
-
-        this._zoomOutScaleWidth = this._getZoomOutScale(svgDimensions.width, maxWidth);
-        this._zoomOutScaleHeight = this._getZoomOutScale(svgDimensions.height, maxHeight);
+        this._zoomOutScaleWidth = this._getZoomOutScale(graphSize.width, svgSize.width);
+        this._zoomOutScaleHeight = this._getZoomOutScale(graphSize.height, svgSize.height);
 
         this._zoomOutScale = Math.min(this._zoomOutScaleWidth, this._zoomOutScaleHeight);
 
+        const translateExtent = [
+            [0, 0],
+            [graphSize.width, graphSize.height]
+        ];
+
         this._zoom = d3.zoom()
-            .extent([[0, 0], [svgDimensions.width, svgDimensions.height]])
+            .extent([[0, 0], [svgSize.width, svgSize.height]])
             .scaleExtent([this._zoomOutScale, 1])
-            .translateExtent([[0, 0], [maxWidth, maxHeight]]);
+            .translateExtent(translateExtent);
 
         this._zoom.on("zoom", this._zoomHandler.bind(this));
 
-        this._svgContainer.call(this._zoom);
+        this._wrapper.call(this._zoom);
     }
 
-    _getZoomOutScale(wrapperDimension, diagramDimension) {
-        if (diagramDimension > wrapperDimension) {
-            return wrapperDimension / (diagramDimension);
+    _getZoomOutScale(size, max) {
+        if (size > max) {
+            return max / size;
         }
-
         return 1;
     }
 
@@ -236,7 +243,7 @@ class Diagram extends Component {
         }
         const targetScale = this._currentScale + 0.1;
         this._zoom.scaleTo(
-            this._svgContainer.transition().duration(this._transitionDuration),
+            this._wrapper.transition().duration(this._transitionDuration),
             targetScale
         );
     }
@@ -247,7 +254,7 @@ class Diagram extends Component {
         }
         const targetScale = this._currentScale - 0.1;
         this._zoom.scaleTo(
-            this._svgContainer.transition().duration(this._transitionDuration),
+            this._wrapper.transition().duration(this._transitionDuration),
             targetScale
         );
     }
@@ -257,13 +264,36 @@ class Diagram extends Component {
             return;
         }
         this._zoom.scaleTo(
-            this._svgContainer.transition().duration(this._transitionDuration),
+            this._wrapper.transition().duration(this._transitionDuration),
             this._zoomOutScale
         );
     }
 
     getZoomScaleExtent() {
         return [this._zoomOutScale, 1];
+    }
+
+    reloadZoom() {
+        if (!this._zoom) {
+            return;
+        }
+
+        this._zoom.on("zoom", null);
+
+        const lastScale = this._currentScale;
+        this._doZoom(this._graphSize);
+
+        if (lastScale < this._zoomOutScale) {
+            this._zoom.scaleTo(
+                this._wrapper.transition().duration(this._transitionDuration),
+                this._zoomOutScale
+            );
+        } else {
+            this._zoom.scaleTo(
+                this._wrapper,
+                lastScale
+            );
+        }
     }
 
     _clearData() {
