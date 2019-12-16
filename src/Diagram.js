@@ -48,7 +48,7 @@ class Diagram extends Component {
             .add("deselectNode")
             .add("highlightNode")
             .add("unhighlightNode")
-            .add("zoom");
+            .add("zoomEnd");
     }
 
     _renderContainer(selector, x = 0, y = 0) {
@@ -167,7 +167,7 @@ class Diagram extends Component {
     }
 
     _centerGraph() {
-        this._zoom.translateTo(this._svgContainer, 0, 0);
+        this._zoom.translateTo(this._wrapper, 0, 0);
     }
 
     _doZoom(graphSize) {
@@ -190,7 +190,8 @@ class Diagram extends Component {
             .scaleExtent([this._zoomOutScale, 1])
             .translateExtent(translateExtent);
 
-        this._zoom.on("zoom", this._zoomHandler.bind(this));
+        this._zoom.on("zoom", this._zoomHandler.bind(this))
+            .on('end', this._zoomEndHandler.bind(this));
 
         this._wrapper.call(this._zoom);
     }
@@ -203,9 +204,12 @@ class Diagram extends Component {
     }
 
     _zoomHandler() {
-        this._observable.fire("zoom", d3.event.transform.k);
         this._currentScale = d3.event.transform.k;
         this._container.attr("transform", d3.event.transform);
+    }
+
+    _zoomEndHandler() {
+        this._observable.fire("zoomEnd", d3.event.transform.k);
     }
 
     _renderEdges(layout, subsequentNodes) {
@@ -278,35 +282,13 @@ class Diagram extends Component {
         this._edges.unhighlightEdges(isSomeSelected);
     }
 
-    zoomIn() {
+    setZoom(targetScale) {
         if (!this._zoomable) {
             return;
         }
-        const targetScale = this._currentScale + 0.1;
         this._zoom.scaleTo(
             this._wrapper.transition().duration(this._transitionDuration),
             targetScale
-        );
-    }
-
-    zoomOut() {
-        if (!this._zoomable) {
-            return;
-        }
-        const targetScale = this._currentScale - 0.1;
-        this._zoom.scaleTo(
-            this._wrapper.transition().duration(this._transitionDuration),
-            targetScale
-        );
-    }
-
-    fullExtent() {
-        if (!this._zoomable) {
-            return;
-        }
-        this._zoom.scaleTo(
-            this._wrapper.transition().duration(this._transitionDuration),
-            this._zoomOutScale
         );
     }
 
