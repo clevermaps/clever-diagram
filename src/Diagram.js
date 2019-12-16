@@ -338,6 +338,7 @@ class Diagram extends Component {
     }
 
     _clearData() {
+        this._zoom.on("zoom", null);
         this._dataEdges = null;
         this._dataNodes = null;
         this._edges = null;
