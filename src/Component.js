@@ -16,7 +16,6 @@ class Component {
             "click"
         ]);
 
-        this._lastData = null;
         this._svg = null;
     }
 
@@ -77,7 +76,6 @@ class Component {
 
     destroy(){
         if (this.isRendered()) {
-            this._lastData = null;
             this.clearData();
             this._container.datum(null);
             this._container.remove();
@@ -103,12 +101,9 @@ class Component {
         if (!this.isRendered()) {
             throw "Can't call setData() when component is not rendered, please call .render() first.";
         }
-        this._lastData = Object.assign({}, this._lastData, data);
 
-        return this._setData(this._container, data, this._lastData);
+        return this._setData(this._container, data);
     }
-
-
 }
 
 export default Component;
