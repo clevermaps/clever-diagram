@@ -9,10 +9,11 @@ class Example {
 
     createDiagram() {
         const zoomable = true;
+        this.currentScale = 1;
+        this.wrapper = document.querySelector('.graph-ct');
 
         if (!zoomable) {
-            const wrapper = document.querySelector('.graph-ct');
-            wrapper.classList.add('scrolling');
+            this.wrapper.classList.add('scrolling');
         }
 
         this.diagram = new CleverDiagram({
@@ -37,12 +38,15 @@ class Example {
             .on('highlightNode', (name) => {
                 console.log(`highlighted node: ${name}`);
             })
-            .on('zoom', (scale) => {
+            .on('zoomEnd', (scale) => {
+                this.currentScale = scale;
                 console.log(`zoom scale: ${scale}`);
             });
 
         d3.json(data[this.variant].path).then(json => {
-            this.diagram.setData(json);
+            this.diagram.setData(json).then(() => {
+                this.scaleExtent = this.diagram.getZoomScaleExtent();
+            });
         });
 
         this.registerEvents();
@@ -75,15 +79,21 @@ class Example {
         });
 
         d3.select('#zoomIn').on('click', () => {
-            this.diagram.zoomIn();
+            this.diagram.setZoom(this.currentScale + 0.1);
         });
 
         d3.select('#zoomOut').on('click', () => {
-            this.diagram.zoomOut();
+            this.diagram.setZoom(this.currentScale - 0.1);
         });
 
         d3.select('#fullExtent').on('click', () => {
-            this.diagram.fullExtent();
+            this.diagram.setZoom(this.scaleExtent[0]);
+        });
+
+        d3.select('#reloadZoom').on('click', () => {
+            this.wrapper.style.width = '700px';
+            this.diagram.reloadZoom();
+            this.scaleExtent = this.diagram.getZoomScaleExtent();
         });
     }
 }
