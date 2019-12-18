@@ -29,42 +29,12 @@ class DiagramNodes extends Component {
         this._layout = data.layout;
         this._groupColors = data.groupColors;
         this._selected = data.selected;
-
-        this._subsequentNodes = this._getSubsequentNodes(data);
+        this._subsequentNodes = data.subsequentNodes;
 
         this._createNodes(data);
         this._renderNodes();
 
         data.nodes.forEach((node, index) => this._setNodeData(node, index));
-    }
-
-    _getSubsequentNodes(data) {
-        return data.nodes.reduce((obj, item) => {
-            const edges = this._findEdgesRecursive(data.edges, [item.name]);
-            obj[item.name] = edges.map(edge => edge.end);
-            return obj;
-        }, {});
-    }
-
-    _findEdgesRecursive(edges, names, alreadySearched=[]) {
-        let results = names.reduce((acc, cur) => {
-            if (alreadySearched.indexOf(cur) >= 0) {
-                return acc;
-            }
-
-            const filteredEdges = edges.filter(edge => edge.start === cur);
-
-            return acc.concat(filteredEdges);
-        }, []);
-
-        const namesToFind = results.map(result => result.end);
-        alreadySearched = alreadySearched.concat(names);
-
-        if (namesToFind.length) {
-            return results.concat(this._findEdgesRecursive(this._dataEdges, namesToFind, alreadySearched));
-        }
-
-        return results;
     }
 
     _createNodes(data) {

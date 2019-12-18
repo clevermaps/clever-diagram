@@ -14,6 +14,7 @@ class DiagramEdges extends Component {
         this._renderDefs();
 
         this._renderEdges(data);
+        this._subsequentNodes = data.subsequentNodes;
     }
 
     _renderDefs() {
@@ -182,6 +183,18 @@ class DiagramEdges extends Component {
             defaultRadius,
             isEnd
         };
+    }
+
+    selectEdges(name) {
+    }
+
+    deselectEdges(name, highlightDeselected=false) {
+    }
+
+    highlightEdges(name) {
+    }
+
+    unhighlightEdges() {
     }
 }
 
