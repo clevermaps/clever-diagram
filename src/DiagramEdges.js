@@ -63,11 +63,9 @@ class DiagramEdges extends Component {
     }
 
     selectEdges(name) {
-        const subsequentNodes = this._subsequentNodes[name];
-
         this._data.edges.forEach((edge, index) => {
             const diagramEdge = this._edges[index];
-            const isSubsequentNode = subsequentNodes.indexOf(edge.start) >= 0;
+            const isSubsequentNode = this._isSubsequentNode(name, edge.start);
             const selected = (name === edge.start) || isSubsequentNode;
             const muted = !selected;
 
@@ -77,8 +75,6 @@ class DiagramEdges extends Component {
     }
 
     deselectEdges(name, highlightDeselected=false) {
-        const subsequentNodes = this._subsequentNodes[name];
-
         this._data.edges.forEach((edge, index) => {
             const diagramEdge = this._edges[index];
 
@@ -87,9 +83,8 @@ class DiagramEdges extends Component {
             let muted = false;
 
             if (highlightDeselected) {
-                const isSubsequentNode = subsequentNodes.indexOf(edge.start) >= 0;
+                const isSubsequentNode = this._isSubsequentNode(name, edge.start);
                 const highlighted = (name === edge.start) || isSubsequentNode;
-
                 muted = !highlighted;
             }
             diagramEdge.setStyle(muted);
@@ -97,13 +92,10 @@ class DiagramEdges extends Component {
     }
 
     highlightEdges(name) {
-        const subsequentNodes = this._subsequentNodes[name];
-
         this._data.edges.forEach((edge, index) => {
             const diagramEdge = this._edges[index];
-            const isSubsequentNode = subsequentNodes.indexOf(edge.start) >= 0;
+            const isSubsequentNode = this._isSubsequentNode(name, edge.start);
             const highlighted = (name === edge.start) || isSubsequentNode;
-
             const muted = !highlighted;
 
             diagramEdge.setStyle(muted);
@@ -118,6 +110,11 @@ class DiagramEdges extends Component {
             const muted = isSomeSelected && !diagramEdge._selected;
             diagramEdge.setStyle(muted, isSomeSelected);
         });
+    }
+
+    _isSubsequentNode(nodeName, edgeStart) {
+        const subsequentNodes = this._subsequentNodes[nodeName];
+        return subsequentNodes.indexOf(edgeStart) >= 0;
     }
 }
 
