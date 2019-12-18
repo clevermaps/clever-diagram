@@ -11,7 +11,8 @@ import {
     NODE_STROKE_COLOR,
     NODE_NAME_FONT_SIZE,
     NODE_ICON_COLOR,
-    NODE_NAME_COLOR
+    NODE_NAME_COLOR,
+    EDGES_STROKE_COLOR_MUTED
 } from './DiagramDefaults';
 
 class DiagramNode extends Component {
@@ -228,20 +229,26 @@ class DiagramNode extends Component {
     }
 
     _setSpecialStyle(color, opacity) {
-        this._nodeSkeleton.attr("fill", color);
-        this._nodeSkeleton.attr("fill-opacity", opacity);
+        this._nodeSkeleton
+            .attr("fill", color)
+            .attr("fill-opacity", opacity)
+            .attr("stroke", NODE_STROKE_COLOR);
         this._line.attr("opacity", "1");
     }
 
     _setMutedStyle() {
-        this._nodeSkeleton.attr("fill", "url(#node-background-muted");
-        this._nodeSkeleton.attr("fill-opacity", "1");
+        this._nodeSkeleton
+            .attr("fill", "url(#node-background-muted")
+            .attr("fill-opacity", "1")
+            .attr("stroke", EDGES_STROKE_COLOR_MUTED);
         this._line.attr("opacity", "0");
     }
 
     _setOriginalStyle() {
-        this._nodeSkeleton.attr("fill", `url(#node-background-default-${this._node.name})`);
-        this._nodeSkeleton.attr("fill-opacity", "1");
+        this._nodeSkeleton
+            .attr("fill", `url(#node-background-default-${this._node.name})`)
+            .attr("fill-opacity", "1")
+            .attr("stroke", NODE_STROKE_COLOR);
         this._line.attr("opacity", "0");
     }
 }
