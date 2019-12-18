@@ -18,3 +18,4 @@ export const NODE_GROUP_COLOR_DEFAULT = '#2196F3';
 export const NODE_GROUP_COLOR_MUTED = '#d5d5d5';
 export const NODE_STROKE_COLOR = '#4a4a4a';
 export const EDGES_STROKE_COLOR = '#4a4a4a';
+export const EDGES_STROKE_COLOR_MUTED = '#bababa';
