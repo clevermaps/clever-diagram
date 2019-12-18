@@ -6,14 +6,12 @@ class DiagramNodes extends Component {
     constructor(
         {
             nodeWidth,
-            mouseControl,
             iconFontFamily
         }
     ) {
         super('diagram-nodes');
 
         this._nodeWidth = nodeWidth;
-        this._mouseControl = mouseControl;
         this._iconFontFamily = iconFontFamily;
 
         this._observable
@@ -38,11 +36,6 @@ class DiagramNodes extends Component {
         this._renderNodes();
 
         data.nodes.forEach((node, index) => this._setNodeData(node, index));
-
-        if (this._mouseControl) {
-            this._doSelecting();
-            this._doHighlighting();
-        }
     }
 
     _getSubsequentNodes(data) {
@@ -191,26 +184,6 @@ class DiagramNodes extends Component {
             selectedMuted,
             styles,
             groupColor
-        });
-    }
-
-    _doSelecting() {
-        this.on("selectNode", (name) => {
-            this.selectNode(name);
-        });
-
-        this.on("deselectNode", (name) => {
-            this.deselectNode(name, true);
-        });
-    }
-
-    _doHighlighting() {
-        this.on("highlightNode", (name) => {
-            this.highlightNode(name);
-        });
-
-        this.on("unhighlightNode", () => {
-            this.unhighlightNode();
         });
     }
 
