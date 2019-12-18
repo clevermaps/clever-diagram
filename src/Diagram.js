@@ -222,22 +222,22 @@ class Diagram extends Component {
 
     selectNode(name) {
         this._nodes.selectNode(name);
-        //this._edges.selectEdges(name);
+        this._edges.selectEdges(name);
     }
 
     deselectNode(name) {
         this._nodes.deselectNode(name);
-        //this._edges.deselectEdges(name);
+        this._edges.deselectEdges(name);
     }
 
     highlightNode(name) {
         this._nodes.highlightNode(name);
-        //this._edges.highlightEdges(name);
+        this._edges.highlightEdges(name);
     }
 
     unhighlightNode() {
         this._nodes.unhighlightNode();
-        //this._edges.unhighlightEdges();
+        this._edges.unhighlightEdges();
     }
 
     _clearData() {

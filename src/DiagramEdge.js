@@ -1,6 +1,7 @@
 import Component from './Component';
 import {
-    EDGES_STROKE_COLOR
+    EDGES_STROKE_COLOR,
+    EDGES_STROKE_COLOR_MUTED
 } from './DiagramDefaults';
 
 class DiagramEdge extends Component {
@@ -161,6 +162,20 @@ class DiagramEdge extends Component {
             defaultRadius,
             isEnd
         };
+    }
+
+    setSelected(value) {
+        this._selected = value;
+    }
+
+    setStyle(muted) {
+        if (muted) {
+            this._edge.attr('stroke', EDGES_STROKE_COLOR_MUTED);
+            this._edge.attr("marker-end", "url(#end-muted)");
+        } else {
+            this._edge.attr('stroke', EDGES_STROKE_COLOR);
+            this._edge.attr("marker-end", "url(#end)");
+        }
     }
 }
 

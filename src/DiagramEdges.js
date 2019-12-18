@@ -62,17 +62,62 @@ class DiagramEdges extends Component {
             .attr("d", "M0,-5L10,0L0,5");
     }
 
-
     selectEdges(name) {
+        const subsequentNodes = this._subsequentNodes[name];
+
+        this._data.edges.forEach((edge, index) => {
+            const diagramEdge = this._edges[index];
+            const isSubsequentNode = subsequentNodes.indexOf(edge.start) >= 0;
+            const selected = (name === edge.start) || isSubsequentNode;
+            const muted = !selected;
+
+            diagramEdge.setSelected(selected);
+            diagramEdge.setStyle(muted);
+        });
     }
 
     deselectEdges(name, highlightDeselected=false) {
+        const subsequentNodes = this._subsequentNodes[name];
+
+        this._data.edges.forEach((edge, index) => {
+            const diagramEdge = this._edges[index];
+
+            diagramEdge.setSelected(false);
+
+            let muted = false;
+
+            if (highlightDeselected) {
+                const isSubsequentNode = subsequentNodes.indexOf(edge.start) >= 0;
+                const highlighted = (name === edge.start) || isSubsequentNode;
+
+                muted = !highlighted;
+            }
+            diagramEdge.setStyle(muted);
+        });
     }
 
     highlightEdges(name) {
+        const subsequentNodes = this._subsequentNodes[name];
+
+        this._data.edges.forEach((edge, index) => {
+            const diagramEdge = this._edges[index];
+            const isSubsequentNode = subsequentNodes.indexOf(edge.start) >= 0;
+            const highlighted = (name === edge.start) || isSubsequentNode;
+
+            const muted = !highlighted;
+
+            diagramEdge.setStyle(muted);
+        });
     }
 
     unhighlightEdges() {
+        const isSomeSelected = this._edges.some(edge => edge._selected);
+
+        this._data.edges.forEach((edge, index) => {
+            const diagramEdge = this._edges[index];
+            const muted = isSomeSelected && !diagramEdge._selected;
+            diagramEdge.setStyle(muted, isSomeSelected);
+        });
     }
 }
 
