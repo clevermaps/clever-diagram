@@ -225,9 +225,9 @@ class Diagram extends Component {
         this._edges.selectEdges(name);
     }
 
-    deselectNode(name) {
-        this._nodes.deselectNode(name);
-        this._edges.deselectEdges(name);
+    deselectNode(name, highlightDeselected=false) {
+        this._nodes.deselectNode(name, highlightDeselected);
+        this._edges.deselectEdges(name, highlightDeselected);
     }
 
     highlightNode(name) {
