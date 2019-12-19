@@ -23,17 +23,17 @@ class Example {
                 console.log(`selected node: ${name}`);
                 this.diagram.selectNode(name);
             })
-            .on('deselectNode', (name, highlightDeselected) => {
+            .on('deselectNode', (name) => {
                 console.log(`deselected node: ${name}`);
-                this.diagram.deselectNode(name, highlightDeselected);
+                this.diagram.deselectNode(name);
                 this.diagram.highlightNode(name);
             })
             .on('highlightNode', (name) => {
                 console.log(`highlighted node: ${name}`);
                 this.diagram.highlightNode(name);
             })
-            .on('unhighlightNode', (name) => {
-                console.log(`highlighted node: ${name}`);
+            .on('unhighlightNode', () => {
+                console.log('unhighlight node');
                 this.diagram.unhighlightNode();
             });
 
