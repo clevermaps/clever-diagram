@@ -4,7 +4,7 @@ export const NODE_WIDTH = 190;
 export const NODE_HEIGHT = 40;
 export const NODE_GROUP_WIDTH = 40;
 
-export const MOUSE_CONTROL = false;
+export const MOUSE_CONTROL = true;
 
 export const ICON_FONT_SIZE = 18;
 export const NODE_NAME_FONT_SIZE = 13;

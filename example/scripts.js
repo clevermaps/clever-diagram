@@ -15,8 +15,7 @@ class Example {
                 'default':'#4CAF50',
                 'projects': 'rgb(181, 19, 254)'
             },
-            iconFontFamily: 'Material-Design-Iconic-Font',
-            mouseControl: true
+            iconFontFamily: 'Material-Design-Iconic-Font'
         });
 
         this.diagram.render('.graph-ct')
