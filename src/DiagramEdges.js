@@ -74,20 +74,11 @@ class DiagramEdges extends Component {
         });
     }
 
-    deselectEdges(name, highlightDeselected=false) {
+    deselectEdges() {
         this._data.edges.forEach((edge, index) => {
             const diagramEdge = this._edges[index];
-
             diagramEdge.setSelected(false);
-
-            let muted = false;
-
-            if (highlightDeselected) {
-                const isSubsequentNode = this._isSubsequentNode(name, edge.start);
-                const highlighted = (name === edge.start) || isSubsequentNode;
-                muted = !highlighted;
-            }
-            diagramEdge.setStyle(muted);
+            diagramEdge.setStyle(false);
         });
     }
 
@@ -102,9 +93,7 @@ class DiagramEdges extends Component {
         });
     }
 
-    unhighlightEdges() {
-        const isSomeSelected = this._edges.some(edge => edge._selected);
-
+    unhighlightEdges(isSomeSelected) {
         this._data.edges.forEach((edge, index) => {
             const diagramEdge = this._edges[index];
             const muted = isSomeSelected && !diagramEdge._selected;

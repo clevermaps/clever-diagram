@@ -62,32 +62,7 @@ class Diagram extends Component {
         this._dataNodes = data.nodes || [];
         this._data = data;
 
-        if (this._mouseControl) {
-            this._doSelecting();
-            this._doHighlighting();
-        }
-
         this._renderElk();
-    }
-
-    _doSelecting() {
-        this.on("selectNode", (name) => {
-            this.selectNode(name);
-        });
-
-        this.on("deselectNode", (name) => {
-            this.deselectNode(name, true);
-        });
-    }
-
-    _doHighlighting() {
-        this.on("highlightNode", (name) => {
-            this.highlightNode(name);
-        });
-
-        this.on("unhighlightNode", () => {
-            this.unhighlightNode();
-        });
     }
 
     _renderElk() {
@@ -196,7 +171,8 @@ class Diagram extends Component {
         };
         this._nodes = new DiagramNodes({
             nodeWidth: this._nodeWidth,
-            iconFontFamily: this._iconFontFamily
+            iconFontFamily: this._iconFontFamily,
+            mouseControl: this._mouseControl
         });
 
         this._nodes.render(this.container.node())
@@ -225,9 +201,9 @@ class Diagram extends Component {
         this._edges.selectEdges(name);
     }
 
-    deselectNode(name, highlightDeselected=false) {
-        this._nodes.deselectNode(name, highlightDeselected);
-        this._edges.deselectEdges(name, highlightDeselected);
+    deselectNode(name) {
+        this._nodes.deselectNode(name);
+        this._edges.deselectEdges();
     }
 
     highlightNode(name) {
@@ -236,8 +212,9 @@ class Diagram extends Component {
     }
 
     unhighlightNode() {
+        const isSomeSelected = this._nodes.isSomeSelected();
         this._nodes.unhighlightNode();
-        this._edges.unhighlightEdges();
+        this._edges.unhighlightEdges(isSomeSelected);
     }
 
     _clearData() {

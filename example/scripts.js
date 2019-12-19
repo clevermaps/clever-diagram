@@ -22,12 +22,20 @@ class Example {
         this.diagram.render('.graph-ct')
             .on('selectNode', (name) => {
                 console.log(`selected node: ${name}`);
+                this.diagram.selectNode(name);
             })
-            .on('deselectNode', (name) => {
+            .on('deselectNode', (name, highlightDeselected) => {
                 console.log(`deselected node: ${name}`);
+                this.diagram.deselectNode(name, highlightDeselected);
+                this.diagram.highlightNode(name);
             })
             .on('highlightNode', (name) => {
                 console.log(`highlighted node: ${name}`);
+                this.diagram.highlightNode(name);
+            })
+            .on('unhighlightNode', (name) => {
+                console.log(`highlighted node: ${name}`);
+                this.diagram.unhighlightNode();
             });
 
         d3.json(data[this.variant].path, json => {
@@ -51,7 +59,6 @@ class Example {
             } else {
                 this.diagram.deselectNode(data[this.variant].node);
             }
-
         });
 
         let doHighlight = false;
@@ -62,7 +69,6 @@ class Example {
             } else {
                 this.diagram.unhighlightNode(data[this.variant].node);
             }
-
         });
     }
 }
