@@ -38,15 +38,14 @@ class Example {
             .on('highlightNode', (name) => {
                 console.log(`highlighted node: ${name}`);
             })
-            .on('zoomEnd', (scale) => {
-                this.currentScale = scale;
-                console.log(`zoom scale: ${scale}`);
+            .on('zoom', (transform) => {
+                console.log(`zoom transform: ${transform}`);
+                this.diagram.setTransform(transform);
+                this.currentScale = transform.k;
             });
 
         d3.json(data[this.variant].path).then(json => {
-            this.diagram.setData(json).then(() => {
-                this.scaleExtent = this.diagram.getZoomScaleExtent();
-            });
+            this.diagram.setData(json);
         });
 
         this.registerEvents();
@@ -87,13 +86,12 @@ class Example {
         });
 
         d3.select('#fullExtent').on('click', () => {
-            this.diagram.setZoom(this.scaleExtent[0]);
+            this.diagram.setFullExtent();
         });
 
         d3.select('#reloadZoom').on('click', () => {
             this.wrapper.style.width = '700px';
             this.diagram.reloadZoom();
-            this.scaleExtent = this.diagram.getZoomScaleExtent();
         });
     }
 }

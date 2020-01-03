@@ -7,7 +7,8 @@ import DiagramNodes from './DiagramNodes';
 import {
     NODE_WIDTH,
     NODE_HEIGHT,
-    MOUSE_CONTROL
+    MOUSE_CONTROL,
+    DIAGRAM_MARGIN
 } from './DiagramDefaults';
 
 /**
@@ -23,7 +24,8 @@ class Diagram extends Component {
         elkWorkerUrl,
         mouseControl = MOUSE_CONTROL,
         iconFontFamily,
-        zoomable = true
+        zoomable = true,
+        diagramMargin = DIAGRAM_MARGIN
     }) {
         super('diagram');
 
@@ -34,6 +36,7 @@ class Diagram extends Component {
         this._mouseControl = mouseControl;
         this._iconFontFamily = iconFontFamily;
         this._zoomable = zoomable;
+        this._diagramMargin = diagramMargin;
 
         this._hasRenderedNodes = false;
         this._currentScale = 1;
@@ -48,11 +51,10 @@ class Diagram extends Component {
             .add("deselectNode")
             .add("highlightNode")
             .add("unhighlightNode")
-            .add("zoomEnd");
+            .add("zoom");
     }
 
     _renderContainer(selector, x = 0, y = 0) {
-        this._wrapper = d3.select(selector);
         this._svgContainer = d3.select(selector).append("svg");
 
         return this._svgContainer.append("g")
@@ -81,8 +83,8 @@ class Diagram extends Component {
             if (!this._zoomable) {
                 this._setGraphSize(this._graphSize);
             } else {
-                this._doZoom(this._graphSize);
-                this._centerGraph();
+                this._doZoom();
+                this._moveGraph();
             }
 
             this._hasRenderedNodes = true;
@@ -134,34 +136,41 @@ class Diagram extends Component {
         this._svgContainer.style("height", `${height}px`);
     }
 
-    _centerGraph() {
-        this._zoom.translateTo(this._wrapper, 0, 0);
+    _moveGraph() {
+        const {x, y} = this._getTranslatePosition(1);
+        this._svgContainer.call(
+            this._zoom.transform,
+            d3.zoomIdentity.translate(x, y)
+        );
     }
 
-    _doZoom(graphSize) {
-        const svgSize = this._svgContainer.node().getBoundingClientRect();
+    _getTranslatePosition(scale) {
+        const getOffset = (dimension, scale) => ((this._svgSize[dimension] - (this._graphSize[dimension] * scale)) / 2);
+        const offsetX = getOffset('width', scale);
+        const offsetY = getOffset('height', scale);
+
+        return {
+            x: Math.max(offsetX, this._diagramMargin),
+            y: Math.max(offsetY, this._diagramMargin)
+        };
+    }
+
+    _doZoom() {
+        this._svgSize = this._svgContainer.node().getBoundingClientRect();
 
         this._svgContainer.classed(style.zoomable, true);
 
-        this._zoomOutScaleWidth = this._getZoomOutScale(graphSize.width, svgSize.width);
-        this._zoomOutScaleHeight = this._getZoomOutScale(graphSize.height, svgSize.height);
+        this._zoomOutScaleWidth = this._getZoomOutScale(this._graphSize.width, this._svgSize.width - (this._diagramMargin * 2));
+        this._zoomOutScaleHeight = this._getZoomOutScale(this._graphSize.height, this._svgSize.height - (this._diagramMargin * 2));
 
         this._zoomOutScale = Math.min(this._zoomOutScaleWidth, this._zoomOutScaleHeight);
 
-        const translateExtent = [
-            [0, 0],
-            [graphSize.width, graphSize.height]
-        ];
-
         this._zoom = d3.zoom()
-            .extent([[0, 0], [svgSize.width, svgSize.height]])
-            .scaleExtent([this._zoomOutScale, 1])
-            .translateExtent(translateExtent);
+            .extent([[0, 0], [this._svgSize.width, this._svgSize.height]])
+            .scaleExtent([this._zoomOutScale, 1]);
 
-        this._zoom.on("zoom", this._zoomHandler.bind(this))
-            .on('end', this._zoomEndHandler.bind(this));
-
-        this._wrapper.call(this._zoom);
+        this._zoom.on("zoom", this._zoomHandler.bind(this));
+        this._svgContainer.call(this._zoom);
     }
 
     _getZoomOutScale(size, max) {
@@ -173,11 +182,8 @@ class Diagram extends Component {
 
     _zoomHandler() {
         this._currentScale = d3.event.transform.k;
-        this._container.attr("transform", d3.event.transform);
-    }
-
-    _zoomEndHandler() {
-        this._observable.fire("zoomEnd", d3.event.transform.k);
+        const {x, y, k} = d3.event.transform;
+        this._observable.fire("zoom", {x, y, k});
     }
 
     _renderEdges(layout) {
@@ -241,18 +247,37 @@ class Diagram extends Component {
         this._nodes.unhighlightNode();
     }
 
+    setTransform(transform) {
+        this._container.attr("transform", `translate(${transform.x}, ${transform.y}), scale(${transform.k})`);
+    }
+
     setZoom(targetScale) {
         if (!this._zoomable) {
             return;
         }
         this._zoom.scaleTo(
-            this._wrapper.transition().duration(this._transitionDuration),
+            this._svgContainer.transition().duration(this._transitionDuration),
             targetScale
         );
     }
 
-    getZoomScaleExtent() {
-        return [this._zoomOutScale, 1];
+    setFullExtent() {
+        if (!this._zoomable) {
+            return;
+        }
+
+        const {x, y, k} = this.getZoomFullExtentTransform();
+        this._svgContainer.transition().duration(this._transitionDuration).call(
+            this._zoom.transform,
+            d3.zoomIdentity.translate(x, y).scale(k)
+        );
+    }
+
+    getZoomFullExtentTransform() {
+        const {x, y} = this._getTranslatePosition(this._zoomOutScale);
+        return {
+            x, y, k: this._zoomOutScale
+        };
     }
 
     reloadZoom() {
@@ -263,23 +288,17 @@ class Diagram extends Component {
         this._zoom.on("zoom", null);
 
         const lastScale = this._currentScale;
-        this._doZoom(this._graphSize);
+        this._doZoom();
 
         if (lastScale < this._zoomOutScale) {
-            this._zoom.scaleTo(
-                this._wrapper.transition().duration(this._transitionDuration),
-                this._zoomOutScale
-            );
-        } else {
-            this._zoom.scaleTo(
-                this._wrapper,
-                lastScale
-            );
+            this.setFullExtent();
         }
     }
 
     _clearData() {
-        this._zoom.on("zoom", null);
+        if (this._zoom) {
+            this._zoom.on("zoom", null);
+        }
         this._dataEdges = null;
         this._dataNodes = null;
         this._edges = null;
