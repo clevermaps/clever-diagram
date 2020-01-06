@@ -12,13 +12,19 @@ class DiagramEdge extends Component {
     _setData(container, data) {
         container.selectAll("*").remove();
 
+        this._selected = data.selected;
+        this._muted = data.muted;
+
         this._renderEdge(data);
     }
 
     _renderEdge(data) {
+        const markerEnd = this._muted ? `url(#end-muted)` : `url(#end)`;
+        const strokeColor = this._muted ? EDGES_STROKE_COLOR_MUTED : EDGES_STROKE_COLOR;
+
         this._edge = this.container.append("path")
             .attr("class", "link")
-            .attr("stroke", EDGES_STROKE_COLOR)
+            .attr("stroke", strokeColor)
             .attr("stroke-width", 1)
             .attr("stroke-linejoin", "bevel")
             .attr("fill", "transparent")
@@ -73,7 +79,7 @@ class DiagramEdge extends Component {
             });
 
         if (data.edge.type == "arrow") {
-            this._edge.attr("marker-end", "url(#end)");
+            this._edge.attr("marker-end", markerEnd);
         }
     }
 
@@ -168,8 +174,12 @@ class DiagramEdge extends Component {
         this._selected = value;
     }
 
-    setStyle(muted) {
-        if (muted) {
+    setMuted(value) {
+        this._muted = value;
+    }
+
+    setStyle() {
+        if (this._muted) {
             this._edge.attr('stroke', EDGES_STROKE_COLOR_MUTED);
             this._edge.attr("marker-end", "url(#end-muted)");
         } else {

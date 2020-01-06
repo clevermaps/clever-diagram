@@ -21,6 +21,7 @@ class DiagramEdges extends Component {
 
         this._data = data;
         this._subsequentNodes = data.subsequentNodes;
+        this._selected = data.selected;
 
         data.edges.forEach((edge, index) => this._setEdgeData(edge, index));
     }
@@ -40,9 +41,21 @@ class DiagramEdges extends Component {
     _setEdgeData(edge, index) {
         const layout = this._data.layout.edges[index];
 
+
+        const selected = this._selected === edge.start;
+        let isSubsequentNode = false;
+
+        if (this._selected) {
+            isSubsequentNode = this._isSubsequentNode(this._selected, edge.start);
+        }
+
+        const muted = this._selected && !(selected || isSubsequentNode);
+
         this._edges[index].setData({
             edge,
-            layout
+            layout,
+            selected,
+            muted
         });
     }
 
@@ -67,18 +80,21 @@ class DiagramEdges extends Component {
             const diagramEdge = this._edges[index];
             const isSubsequentNode = this._isSubsequentNode(name, edge.start);
             const selected = (name === edge.start) || isSubsequentNode;
-            const muted = !selected;
 
             diagramEdge.setSelected(selected);
-            diagramEdge.setStyle(muted);
+            diagramEdge.setMuted(!selected);
+            diagramEdge.setStyle();
         });
     }
 
-    deselectEdges() {
+    deselectEdges(isSomeHighlighted) {
         this._data.edges.forEach((edge, index) => {
             const diagramEdge = this._edges[index];
+            const muted = isSomeHighlighted && diagramEdge._muted;
+
+            diagramEdge.setMuted(muted);
             diagramEdge.setSelected(false);
-            diagramEdge.setStyle(false);
+            diagramEdge.setStyle();
         });
     }
 
@@ -87,9 +103,9 @@ class DiagramEdges extends Component {
             const diagramEdge = this._edges[index];
             const isSubsequentNode = this._isSubsequentNode(name, edge.start);
             const highlighted = (name === edge.start) || isSubsequentNode;
-            const muted = !highlighted;
 
-            diagramEdge.setStyle(muted);
+            diagramEdge.setMuted(!highlighted);
+            diagramEdge.setStyle();
         });
     }
 
@@ -97,7 +113,9 @@ class DiagramEdges extends Component {
         this._data.edges.forEach((edge, index) => {
             const diagramEdge = this._edges[index];
             const muted = isSomeSelected && !diagramEdge._selected;
-            diagramEdge.setStyle(muted, isSomeSelected);
+
+            diagramEdge.setMuted(muted);
+            diagramEdge.setStyle();
         });
     }
 

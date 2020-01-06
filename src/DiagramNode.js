@@ -204,6 +204,10 @@ class DiagramNode extends Component {
         return this._selectedSubsequent;
     }
 
+    isHighlighted() {
+        return this._highlighted;
+    }
+
     setSelected(value) {
         this._selected = value;
     }

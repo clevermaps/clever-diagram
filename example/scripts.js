@@ -26,7 +26,6 @@ class Example {
             .on('deselectNode', (name) => {
                 console.log(`deselected node: ${name}`);
                 this.diagram.deselectNode(name);
-                this.diagram.highlightNode(name);
             })
             .on('highlightNode', (name) => {
                 console.log(`highlighted node: ${name}`);

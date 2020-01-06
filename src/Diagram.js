@@ -153,7 +153,8 @@ class Diagram extends Component {
         const data = {
             layout,
             edges: this._dataEdges,
-            subsequentNodes
+            subsequentNodes,
+            selected: this._data.selected,
         };
         this._edges = new DiagramEdges();
         this._edges.render(this.container.node());
@@ -202,8 +203,9 @@ class Diagram extends Component {
     }
 
     deselectNode(name) {
+        const isSomeHighlighted = this._nodes.isSomeHighlighted();
         this._nodes.deselectNode(name);
-        this._edges.deselectEdges();
+        this._edges.deselectEdges(isSomeHighlighted);
     }
 
     highlightNode(name) {

@@ -97,9 +97,6 @@ class DiagramNodes extends Component {
 
             diagramNode.setSelected(false);
             diagramNode.setSelectedMuted(false);
-            diagramNode.setHighlighted(false);
-            diagramNode.setHighlightedSubsequent(false);
-            diagramNode.setHighlightedMuted(false);
             diagramNode.setStyle();
         });
 
@@ -164,6 +161,10 @@ class DiagramNodes extends Component {
 
     isSomeSelected() {
         return this._nodes.some(node => node.isSelected());
+    }
+
+    isSomeHighlighted() {
+        return this._nodes.some(node => node.isHighlighted());
     }
 }
 
