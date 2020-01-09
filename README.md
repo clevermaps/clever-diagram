@@ -4,6 +4,11 @@ Simple javascript tool to visualize model relationships based on Eclipse Layout 
 
 ## Changelog
 
+### 1.1.2 > 1.1.3
+
+Add zoom and pan functionality to diagram
+* Controlled with zoomable option
+
 ### 1.1.1 > 1.1.2
 
 Mute edges with no relation with highlighted/selected dataset.

@@ -1,5 +1,8 @@
 .diagram {
+}
 
+.zoomable {
+    overflow: visible;
 }
 
 .diagram-nodes {
@@ -16,7 +19,6 @@
 }
 
 .diagram-edges {
-    pointer-events: none;
 }
 
 .node-skeleton {

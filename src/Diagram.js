@@ -5,10 +5,10 @@ import Component from './Component';
 import DiagramEdges from './DiagramEdges';
 import DiagramNodes from './DiagramNodes';
 import {
-    DIAGRAM_MARGIN,
     NODE_WIDTH,
     NODE_HEIGHT,
-    MOUSE_CONTROL
+    MOUSE_CONTROL,
+    DIAGRAM_MARGIN
 } from './DiagramDefaults';
 
 /**
@@ -22,9 +22,10 @@ class Diagram extends Component {
         nodeHeight = NODE_HEIGHT,
         groupColors = {},
         elkWorkerUrl,
-        diagramMargin = DIAGRAM_MARGIN,
         mouseControl = MOUSE_CONTROL,
-        iconFontFamily
+        iconFontFamily,
+        zoomable = true,
+        diagramMargin = DIAGRAM_MARGIN
     }) {
         super('diagram');
 
@@ -32,11 +33,14 @@ class Diagram extends Component {
         this._nodeHeight = nodeHeight;
         this._groupColors = groupColors;
         this._elkWorkerUrl = elkWorkerUrl;
-        this._diagramMargin = diagramMargin;
         this._mouseControl = mouseControl;
         this._iconFontFamily = iconFontFamily;
+        this._zoomable = zoomable;
+        this._diagramMargin = diagramMargin;
 
         this._hasRenderedNodes = false;
+        this._currentScale = 1;
+        this._transitionDuration = 200;
 
         this._elk = new ELK({
             workerUrl: this._elkWorkerUrl
@@ -46,11 +50,14 @@ class Diagram extends Component {
             .add("selectNode")
             .add("deselectNode")
             .add("highlightNode")
-            .add("unhighlightNode");
+            .add("unhighlightNode")
+            .add("zoom");
     }
 
     _renderContainer(selector, x = 0, y = 0) {
-        return d3.select(selector).append("svg")
+        this._svgContainer = d3.select(selector).append("svg");
+
+        return this._svgContainer.append("g")
             .attr("class", style[this.className])
             .attr("transform", `translate(${x}, ${y})`);
     }
@@ -62,7 +69,7 @@ class Diagram extends Component {
         this._dataNodes = data.nodes || [];
         this._data = data;
 
-        this._renderElk();
+        return this._renderElk();
     }
 
     _renderElk() {
@@ -73,7 +80,16 @@ class Diagram extends Component {
 
             this._renderEdges(layout, subsequentNodes);
             this._renderNodes(layout, subsequentNodes);
-            this._setGraphSize(layout.children, layout.edges);
+
+            this._graphSize = this._getGraphSize(layout.children, layout.edges);
+
+            if (!this._zoomable) {
+                this._setGraphSize(this._graphSize);
+            } else {
+                this._doZoom();
+                this._moveGraph();
+            }
+
             this._hasRenderedNodes = true;
         });
     }
@@ -135,18 +151,71 @@ class Diagram extends Component {
         return results;
     }
 
-    _setGraphSize(nodes, edges) {
+    _getGraphSize(nodes, edges) {
         const edgesWithBendPoints = edges.flatMap(edge => edge.sections.filter(section => section.bendPoints));
         const bendPointsYs = edgesWithBendPoints.flatMap(edge => edge.bendPoints.flatMap(bendPoint => bendPoint.y));
         const maxEdgesY = Math.max.apply(Math, bendPointsYs);
         const maxNodesY = Math.max.apply(Math, nodes.map(node => node.y + node.height));
 
-        const maxHeight = Math.max(maxEdgesY, maxNodesY);
-        const maxWidth = Math.max.apply(Math, nodes.map(node => node.x + node.width));
+        const height = Math.max(maxEdgesY, maxNodesY) + 10;
+        const width = Math.max.apply(Math, nodes.map(node => node.x + node.width)) + 10;
 
-        this.container.style("width", `${maxWidth + 10}px`);
-        this.container.style("height", `${maxHeight + 10}px`);
-        this.container.style("margin", `${this._diagramMargin}px`);
+        return {width, height};
+    }
+
+    _setGraphSize({width, height}) {
+        this._svgContainer.style("width", `${width}px`);
+        this._svgContainer.style("height", `${height}px`);
+    }
+
+    _moveGraph() {
+        const {x, y} = this._getTranslatePosition(1);
+        this._svgContainer.call(
+            this._zoom.transform,
+            d3.zoomIdentity.translate(x, y)
+        );
+    }
+
+    _getTranslatePosition(scale) {
+        const getOffset = (dimension, scale) => ((this._svgSize[dimension] - (this._graphSize[dimension] * scale)) / 2);
+        const offsetX = getOffset('width', scale);
+        const offsetY = getOffset('height', scale);
+
+        return {
+            x: Math.max(offsetX, this._diagramMargin),
+            y: Math.max(offsetY, this._diagramMargin)
+        };
+    }
+
+    _doZoom() {
+        this._svgSize = this._svgContainer.node().getBoundingClientRect();
+
+        this._svgContainer.classed(style.zoomable, true);
+
+        this._zoomOutScaleWidth = this._getZoomOutScale(this._graphSize.width, this._svgSize.width - (this._diagramMargin * 2));
+        this._zoomOutScaleHeight = this._getZoomOutScale(this._graphSize.height, this._svgSize.height - (this._diagramMargin * 2));
+
+        this._zoomOutScale = Math.min(this._zoomOutScaleWidth, this._zoomOutScaleHeight);
+
+        this._zoom = d3.zoom()
+            .extent([[0, 0], [this._svgSize.width, this._svgSize.height]])
+            .scaleExtent([this._zoomOutScale, 1]);
+
+        this._zoom.on("zoom", this._zoomHandler.bind(this));
+        this._svgContainer.call(this._zoom);
+    }
+
+    _getZoomOutScale(size, max) {
+        if (size > max) {
+            return max / size;
+        }
+        return 1;
+    }
+
+    _zoomHandler() {
+        this._currentScale = d3.event.transform.k;
+        const {x, y, k} = d3.event.transform;
+        this._observable.fire("zoom", {x, y, k});
     }
 
     _renderEdges(layout, subsequentNodes) {
@@ -219,7 +288,58 @@ class Diagram extends Component {
         this._edges.unhighlightEdges(isSomeSelected);
     }
 
+    setTransform(transform) {
+        this._container.attr("transform", `translate(${transform.x}, ${transform.y}), scale(${transform.k})`);
+    }
+
+    setZoom(targetScale) {
+        if (!this._zoomable) {
+            return;
+        }
+        this._zoom.scaleTo(
+            this._svgContainer.transition().duration(this._transitionDuration),
+            targetScale
+        );
+    }
+
+    setFullExtent() {
+        if (!this._zoomable) {
+            return;
+        }
+
+        const {x, y, k} = this.getZoomFullExtentTransform();
+        this._svgContainer.transition().duration(this._transitionDuration).call(
+            this._zoom.transform,
+            d3.zoomIdentity.translate(x, y).scale(k)
+        );
+    }
+
+    getZoomFullExtentTransform() {
+        const {x, y} = this._getTranslatePosition(this._zoomOutScale);
+        return {
+            x, y, k: this._zoomOutScale
+        };
+    }
+
+    reloadZoom() {
+        if (!this._zoom) {
+            return;
+        }
+
+        this._zoom.on("zoom", null);
+
+        const lastScale = this._currentScale;
+        this._doZoom();
+
+        if (lastScale < this._zoomOutScale) {
+            this.setFullExtent();
+        }
+    }
+
     _clearData() {
+        if (this._zoom) {
+            this._zoom.on("zoom", null);
+        }
         this._dataEdges = null;
         this._dataNodes = null;
         this._edges = null;
