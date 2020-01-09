@@ -1,6 +1,8 @@
 import Component from './Component';
+import DiagramEdge from './DiagramEdge';
 import {
-    EDGES_STROKE_COLOR
+    EDGES_STROKE_COLOR,
+    EDGES_STROKE_COLOR_MUTED
 } from './DiagramDefaults';
 
 class DiagramEdges extends Component {
@@ -11,177 +13,115 @@ class DiagramEdges extends Component {
     _setData(container, data) {
         container.selectAll("*").remove();
 
-        this._renderDefs();
+        this._renderDefs('end', EDGES_STROKE_COLOR);
+        this._renderDefs('end-muted', EDGES_STROKE_COLOR_MUTED);
 
-        this._renderEdges(data);
+        this._createEdges(data);
+        this._renderEdges();
+
+        this._data = data;
+        this._subsequentNodes = data.subsequentNodes;
+        this._selected = data.selected;
+
+        data.edges.forEach((edge, index) => this._setEdgeData(edge, index));
     }
 
-    _renderDefs() {
+    _createEdges(data) {
+        this._edges = data.edges.map(() => {
+            return new DiagramEdge();
+        });
+    }
+
+    _renderEdges() {
+        this._edges.forEach((edge, index) => {
+            edge.render(this.container.node(), 0, 0, index);
+        });
+    }
+
+    _setEdgeData(edge, index) {
+        const layout = this._data.layout.edges[index];
+
+
+        const selected = this._selected === edge.start;
+        let isSubsequentNode = false;
+
+        if (this._selected) {
+            isSubsequentNode = this._isSubsequentNode(this._selected, edge.start);
+        }
+
+        const muted = this._selected && !(selected || isSubsequentNode);
+
+        this._edges[index].setData({
+            edge,
+            layout,
+            selected,
+            muted
+        });
+    }
+
+    _renderDefs(id, color) {
         this.container.append("svg:defs")
             .append("svg:marker")
-            .attr("id", "end")
+            .attr("id", id)
             .attr("viewBox", "0 -5 10 10")
             .attr("refX", 10)
             .attr("refY", 0)
             .attr("markerWidth", 5)
             .attr("markerHeight", 5)
             .attr("orient", "auto")
-            .style("fill", EDGES_STROKE_COLOR)
+            .style("fill", color)
             .style("stroke-opacity", 0.6)
             .append("svg:path")
             .attr("d", "M0,-5L10,0L0,5");
     }
 
-    _renderEdges(data) {
-        const layout = data.layout;
-        data.edges.forEach((edge, index) => {
-            const link = this.container.append("path")
-                .attr("class", "link")
-                .attr("stroke", EDGES_STROKE_COLOR)
-                .attr("stroke-width", 1)
-                .attr("stroke-linejoin", "bevel")
-                .attr("fill", "transparent")
-                .attr("d", () => {
-                    const d = layout.edges[index].sections[0];
-                    let path = "";
-                    if (d.startPoint && d.endPoint) {
-                        path += `M${d.startPoint.x} ${d.startPoint.y} `;
+    selectEdges(name) {
+        this._data.edges.forEach((edge, index) => {
+            const diagramEdge = this._edges[index];
+            const isSubsequentNode = this._isSubsequentNode(name, edge.start);
+            const selected = (name === edge.start) || isSubsequentNode;
 
-                        const defaultRadius = 6;
-                        let lastPoint = {
-                            x: d.startPoint.x,
-                            y: d.startPoint.y
-                        };
-
-                        (d.bendPoints || []).forEach((bendPoint, index) => {
-
-                            const nextPoint = d.bendPoints[index + 1] || d.endPoint;
-
-                            const params = this._getSectionParams(
-                                bendPoint,
-                                lastPoint,
-                                nextPoint,
-                                defaultRadius
-                            );
-
-                            const section = this._getSection(params);
-
-                            path += section;
-
-                            lastPoint.x = bendPoint.x;
-                            lastPoint.y = bendPoint.y;
-
-                        }, this);
-
-                        const isEnd = true;
-                        const nextPoint = {};
-                        const params = this._getSectionParams(
-                            d.endPoint,
-                            lastPoint,
-                            nextPoint,
-                            defaultRadius,
-                            isEnd
-                        );
-
-                        const endSection = this._getSection(params);
-
-                        path += endSection;
-                    }
-
-                    return path;
-                });
-
-            if (edge.type == "arrow") {
-                link.attr("marker-end", "url(#end)");
-            }
+            diagramEdge.setSelected(selected);
+            diagramEdge.setMuted(!selected);
+            diagramEdge.setStyle();
         });
     }
 
-    _getSection(params) {
-        const {x, y, defaultRadius, isEnd} = params;
+    deselectEdges(isSomeHighlighted) {
+        this._data.edges.forEach((edge, index) => {
+            const diagramEdge = this._edges[index];
+            const muted = isSomeHighlighted && diagramEdge._muted;
 
-        let curve = '';
-        let line = '';
-        let radius = defaultRadius;
-
-        const diff = {
-            lastX: x.rounded - x.lastRounded,
-            lastY: y.rounded - y.lastRounded,
-            nextX: x.nextRounded - x.rounded,
-            nextY: y.nextRounded - y.rounded
-        };
-
-        Object.keys(diff).forEach(key => {
-            const abs = Math.abs(diff[key]);
-            if (abs && abs < radius) {
-                radius = abs / 2;
-            }
+            diagramEdge.setMuted(muted);
+            diagramEdge.setSelected(false);
+            diagramEdge.setStyle();
         });
-
-        const lineEndCorrection = isEnd ? 0 : radius;
-
-        // DRAW LINE
-        if (diff.lastX > 0) {
-            // to right
-            line = `L ${x.current - lineEndCorrection} ${y.current} `;
-        } else if (diff.lastX < 0) {
-            // to left
-            line = `L ${x.current + lineEndCorrection} ${y.current} `;
-        } else if (diff.lastY > 0) {
-            // to bottom
-            line = `L ${x.current} ${y.current - lineEndCorrection} `;
-        } else if (diff.lastY < 0) {
-            // to top
-            line = `L ${x.current} ${y.current + lineEndCorrection} `;
-        }
-
-        // DRAW CURVE
-        if (!isEnd) {
-            if (diff.nextY > 0) {
-                // to bottom
-                curve = `Q ${x.current} ${y.current} ${x.current} ${y.current + radius} `;
-            } else if (diff.nextY < 0) {
-                // to top
-                curve = `Q ${x.current} ${y.current} ${x.current} ${y.current - radius} `;
-            } else if (diff.nextX < 0) {
-                // to left
-                curve = `Q ${x.current} ${y.current} ${x.current - radius} ${y.current} `;
-            } else if (diff.nextX > 0) {
-                // to right
-                curve = `Q ${x.current} ${y.current} ${x.current + radius} ${y.current} `;
-            }
-        }
-
-        return line.concat(curve);
     }
 
-    _getSectionParams(
-        point,
-        lastPoint,
-        nextPoint,
-        defaultRadius,
-        isEnd = false
-    ) {
-        return {
-            x: {
-                current: point.x,
-                last: lastPoint.x,
-                next: nextPoint.x,
-                rounded: Math.round(point.x),
-                lastRounded: Math.round(lastPoint.x),
-                nextRounded: Math.round(nextPoint.x)
-            },
-            y: {
-                current: point.y,
-                last: lastPoint.y,
-                next: nextPoint.y,
-                rounded: Math.round(point.y),
-                lastRounded: Math.round(lastPoint.y),
-                nextRounded: Math.round(nextPoint.y)
-            },
-            defaultRadius,
-            isEnd
-        };
+    highlightEdges(name) {
+        this._data.edges.forEach((edge, index) => {
+            const diagramEdge = this._edges[index];
+            const isSubsequentNode = this._isSubsequentNode(name, edge.start);
+            const highlighted = (name === edge.start) || isSubsequentNode;
+
+            diagramEdge.setMuted(!highlighted);
+            diagramEdge.setStyle();
+        });
+    }
+
+    unhighlightEdges(isSomeSelected) {
+        this._data.edges.forEach((edge, index) => {
+            const diagramEdge = this._edges[index];
+            const muted = isSomeSelected && !diagramEdge._selected;
+
+            diagramEdge.setMuted(muted);
+            diagramEdge.setStyle();
+        });
+    }
+
+    _isSubsequentNode(nodeName, edgeStart) {
+        const subsequentNodes = this._subsequentNodes[nodeName];
+        return subsequentNodes.indexOf(edgeStart) >= 0;
     }
 }
 

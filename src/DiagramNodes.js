@@ -6,15 +6,15 @@ class DiagramNodes extends Component {
     constructor(
         {
             nodeWidth,
-            mouseControl,
-            iconFontFamily
+            iconFontFamily,
+            mouseControl
         }
     ) {
         super('diagram-nodes');
 
         this._nodeWidth = nodeWidth;
-        this._mouseControl = mouseControl;
         this._iconFontFamily = iconFontFamily;
+        this._mouseControl = mouseControl;
 
         this._observable
             .add("selectNode")
@@ -31,47 +31,12 @@ class DiagramNodes extends Component {
         this._layout = data.layout;
         this._groupColors = data.groupColors;
         this._selected = data.selected;
-
-        this._subsequentNodes = this._getSubsequentNodes(data);
+        this._subsequentNodes = data.subsequentNodes;
 
         this._createNodes(data);
         this._renderNodes();
 
         data.nodes.forEach((node, index) => this._setNodeData(node, index));
-
-        if (this._mouseControl) {
-            this._doSelecting();
-            this._doHighlighting();
-        }
-    }
-
-    _getSubsequentNodes(data) {
-        return data.nodes.reduce((obj, item) => {
-            const edges = this._findEdgesRecursive(data.edges, [item.name]);
-            obj[item.name] = edges.map(edge => edge.end);
-            return obj;
-        }, {});
-    }
-
-    _findEdgesRecursive(edges, names, alreadySearched=[]) {
-        let results = names.reduce((acc, cur) => {
-            if (alreadySearched.indexOf(cur) >= 0) {
-                return acc;
-            }
-
-            const filteredEdges = edges.filter(edge => edge.start === cur);
-
-            return acc.concat(filteredEdges);
-        }, []);
-
-        const namesToFind = results.map(result => result.end);
-        alreadySearched = alreadySearched.concat(names);
-
-        if (namesToFind.length) {
-            return results.concat(this._findEdgesRecursive(this._dataEdges, namesToFind, alreadySearched));
-        }
-
-        return results;
     }
 
     _createNodes(data) {
@@ -87,23 +52,26 @@ class DiagramNodes extends Component {
         this._nodes.forEach((node, index) => {
             const name = this._dataNodes[index].name;
             const styles = this._getStyles(this._layout.children[index]);
-            node.render(this.container.node(), styles.x, styles.y, index)
-                .on("click", (index) => {
-                    if (this._nodes[index].isSelected()) {
-                        this._observable.fire("deselectNode", name);
-                    } else {
-                        this._observable.fire("selectNode", name);
-                    }
-                })
-                .on("enter", () => {
-                    this._enterTimeout = setTimeout(() => {
-                        this._observable.fire("highlightNode", name);
-                    }, 150);
-                })
-                .on("leave", () => {
-                    clearTimeout(this._enterTimeout);
-                    this._observable.fire("unhighlightNode");
-                });
+            node.render(this.container.node(), styles.x, styles.y, index);
+            if (this._mouseControl) {
+                node
+                    .on("click", (index) => {
+                        if (this._nodes[index].isSelected()) {
+                            this._observable.fire("deselectNode", name);
+                        } else {
+                            this._observable.fire("selectNode", name);
+                        }
+                    })
+                    .on("enter", () => {
+                        this._enterTimeout = setTimeout(() => {
+                            this._observable.fire("highlightNode", name);
+                        }, 150);
+                    })
+                    .on("leave", () => {
+                        clearTimeout(this._enterTimeout);
+                        this._observable.fire("unhighlightNode");
+                    });
+            }
         });
     }
 
@@ -123,24 +91,12 @@ class DiagramNodes extends Component {
         });
     }
 
-    deselectNode(name, highlightDeselected=false) {
-        const subsequentNodes = this._subsequentNodes[name];
-
+    deselectNode() {
         this._dataNodes.forEach((node, index) => {
             const diagramNode = this._nodes[index];
 
             diagramNode.setSelected(false);
             diagramNode.setSelectedMuted(false);
-
-            if (highlightDeselected) {
-                const highlighted = name === node.name;
-                const isSubsequentNode = subsequentNodes.indexOf(node.name) >= 0;
-                const muted = !(highlighted || isSubsequentNode);
-
-                diagramNode.setHighlighted(highlighted);
-                diagramNode.setHighlightedSubsequent(isSubsequentNode);
-                diagramNode.setHighlightedMuted(muted);
-            }
             diagramNode.setStyle();
         });
 
@@ -194,26 +150,6 @@ class DiagramNodes extends Component {
         });
     }
 
-    _doSelecting() {
-        this.on("selectNode", (name) => {
-            this.selectNode(name);
-        });
-
-        this.on("deselectNode", (name) => {
-            this.deselectNode(name, true);
-        });
-    }
-
-    _doHighlighting() {
-        this.on("highlightNode", (name) => {
-            this.highlightNode(name);
-        });
-
-        this.on("unhighlightNode", () => {
-            this.unhighlightNode();
-        });
-    }
-
     _getStyles(layout) {
         return {
             y: layout.y,
@@ -221,6 +157,14 @@ class DiagramNodes extends Component {
             width: layout.width,
             height: layout.height
         };
+    }
+
+    isSomeSelected() {
+        return this._nodes.some(node => node.isSelected());
+    }
+
+    isSomeHighlighted() {
+        return this._nodes.some(node => node.isHighlighted());
     }
 }
 

@@ -69,8 +69,10 @@ class Diagram extends Component {
         const graph = this._getElkGraph();
 
         return this._elk.layout(graph).then(layout => {
-            this._renderNodes(layout);
-            this._renderEdges(layout);
+            const subsequentNodes = this._getSubsequentNodes(this._data);
+
+            this._renderEdges(layout, subsequentNodes);
+            this._renderNodes(layout, subsequentNodes);
             this._setGraphSize(layout.children, layout.edges);
             this._hasRenderedNodes = true;
         });
@@ -104,6 +106,35 @@ class Diagram extends Component {
         };
     }
 
+    _getSubsequentNodes(data) {
+        return data.nodes.reduce((obj, item) => {
+            const edges = this._findEdgesRecursive(data.edges, [item.name]);
+            obj[item.name] = edges.map(edge => edge.end);
+            return obj;
+        }, {});
+    }
+
+    _findEdgesRecursive(edges, names, alreadySearched=[]) {
+        let results = names.reduce((acc, cur) => {
+            if (alreadySearched.indexOf(cur) >= 0) {
+                return acc;
+            }
+
+            const filteredEdges = edges.filter(edge => edge.start === cur);
+
+            return acc.concat(filteredEdges);
+        }, []);
+
+        const namesToFind = results.map(result => result.end);
+        alreadySearched = alreadySearched.concat(names);
+
+        if (namesToFind.length) {
+            return results.concat(this._findEdgesRecursive(this._dataEdges, namesToFind, alreadySearched));
+        }
+
+        return results;
+    }
+
     _setGraphSize(nodes, edges) {
         const edgesWithBendPoints = edges.flatMap(edge => edge.sections.filter(section => section.bendPoints));
         const bendPointsYs = edgesWithBendPoints.flatMap(edge => edge.bendPoints.flatMap(bendPoint => bendPoint.y));
@@ -118,28 +149,31 @@ class Diagram extends Component {
         this.container.style("margin", `${this._diagramMargin}px`);
     }
 
-    _renderEdges(layout) {
+    _renderEdges(layout, subsequentNodes) {
         const data = {
             layout,
-            edges: this._dataEdges
+            edges: this._dataEdges,
+            subsequentNodes,
+            selected: this._data.selected,
         };
         this._edges = new DiagramEdges();
         this._edges.render(this.container.node());
         this._edges.setData(data);
     }
 
-    _renderNodes(layout) {
+    _renderNodes(layout, subsequentNodes) {
         const data = {
             nodes: this._data.nodes,
             edges: this._data.edges,
             selected: this._data.selected,
             layout,
-            groupColors: this._groupColors
+            groupColors: this._groupColors,
+            subsequentNodes
         };
         this._nodes = new DiagramNodes({
             nodeWidth: this._nodeWidth,
-            mouseControl: this._mouseControl,
-            iconFontFamily: this._iconFontFamily
+            iconFontFamily: this._iconFontFamily,
+            mouseControl: this._mouseControl
         });
 
         this._nodes.render(this.container.node())
@@ -165,18 +199,24 @@ class Diagram extends Component {
 
     selectNode(name) {
         this._nodes.selectNode(name);
+        this._edges.selectEdges(name);
     }
 
     deselectNode(name) {
+        const isSomeHighlighted = this._nodes.isSomeHighlighted();
         this._nodes.deselectNode(name);
+        this._edges.deselectEdges(isSomeHighlighted);
     }
 
     highlightNode(name) {
         this._nodes.highlightNode(name);
+        this._edges.highlightEdges(name);
     }
 
     unhighlightNode() {
+        const isSomeSelected = this._nodes.isSomeSelected();
         this._nodes.unhighlightNode();
+        this._edges.unhighlightEdges(isSomeSelected);
     }
 
     _clearData() {

@@ -15,19 +15,25 @@ class Example {
                 'default':'#4CAF50',
                 'projects': 'rgb(181, 19, 254)'
             },
-            iconFontFamily: 'Material-Design-Iconic-Font',
-            mouseControl: true
+            iconFontFamily: 'Material-Design-Iconic-Font'
         });
 
         this.diagram.render('.graph-ct')
             .on('selectNode', (name) => {
                 console.log(`selected node: ${name}`);
+                this.diagram.selectNode(name);
             })
             .on('deselectNode', (name) => {
                 console.log(`deselected node: ${name}`);
+                this.diagram.deselectNode(name);
             })
             .on('highlightNode', (name) => {
                 console.log(`highlighted node: ${name}`);
+                this.diagram.highlightNode(name);
+            })
+            .on('unhighlightNode', () => {
+                console.log('unhighlight node');
+                this.diagram.unhighlightNode();
             });
 
         d3.json(data[this.variant].path, json => {
@@ -51,7 +57,6 @@ class Example {
             } else {
                 this.diagram.deselectNode(data[this.variant].node);
             }
-
         });
 
         let doHighlight = false;
@@ -62,7 +67,6 @@ class Example {
             } else {
                 this.diagram.unhighlightNode(data[this.variant].node);
             }
-
         });
     }
 }
