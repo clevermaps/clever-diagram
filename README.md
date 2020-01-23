@@ -4,6 +4,10 @@ Simple javascript tool to visualize model relationships based on Eclipse Layout 
 
 ## Changelog
 
+### 1.1.3 > 1.1.4
+
+Adjust selection yellow color
+
 ### 1.1.2 > 1.1.3
 
 Add zoom and pan functionality to diagram
