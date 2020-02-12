@@ -166,6 +166,10 @@ class DiagramNodes extends Component {
     isSomeHighlighted() {
         return this._nodes.some(node => node.isHighlighted());
     }
+
+    getNodeByName(name) {
+        return this._nodes.find(node => node.name === name);
+    }
 }
 
 export default DiagramNodes;

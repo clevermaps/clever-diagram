@@ -66,10 +66,12 @@ class Example {
         let doSelect = false;
         d3.select('#selectNode').on('click', () => {
             doSelect = !doSelect;
+            const node = data[this.variant].node;
             if (doSelect) {
-                this.diagram.selectNode(data[this.variant].node);
+                this.diagram.selectNode(node);
+                this.diagram.centerNodeIfOutOfView(node);
             } else {
-                this.diagram.deselectNode(data[this.variant].node);
+                this.diagram.deselectNode(node);
             }
         });
 

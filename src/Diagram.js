@@ -288,6 +288,51 @@ class Diagram extends Component {
         this._edges.unhighlightEdges(isSomeSelected);
     }
 
+    centerNode(name) {
+        const node = this._nodes.getNodeByName(name);
+        if (!this._zoomable) {
+            return;
+        }
+
+        const defaultPosition = {
+            x: node.styles.x,
+            y: node.styles.y
+        };
+        const x = this._svgSize.width / 2 - (defaultPosition.x + (NODE_WIDTH / 2)) * this._currentScale;
+        const y = this._svgSize.height / 2 - (defaultPosition.y + (NODE_HEIGHT / 2)) * this._currentScale;
+
+        this._svgContainer.transition().duration(this._transitionDuration).call(
+            this._zoom.transform,
+            d3.zoomIdentity.translate(x, y).scale(this._currentScale)
+        );
+    }
+
+    centerNodeIfOutOfView(name) {
+        if (!this.isNodeOutOfView(name)) {
+            return;
+        }
+
+        this.centerNode(name);
+    }
+
+    isNodeOutOfView(name) {
+        const node = this._nodes.getNodeByName(name);
+        const currentPosition = node.container.node().getBoundingClientRect();
+        const nodeOffset = {
+            top: currentPosition.top - this._svgSize.top,
+            bottom: currentPosition.top + NODE_HEIGHT,
+            left: currentPosition.left - this._svgSize.left,
+            right: currentPosition.left + NODE_WIDTH
+        };
+
+        return (
+            nodeOffset.bottom > this._svgSize.height ||
+            nodeOffset.top < 0 ||
+            nodeOffset.right > this._svgSize.width ||
+            nodeOffset.left < 0
+        );
+    }
+
     setTransform(transform) {
         this._container.attr("transform", `translate(${transform.x}, ${transform.y}), scale(${transform.k})`);
     }

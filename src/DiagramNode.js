@@ -255,6 +255,14 @@ class DiagramNode extends Component {
             .attr("stroke", NODE_STROKE_COLOR);
         this._line.attr("opacity", "0");
     }
+
+    get styles() {
+        return this._styles;
+    }
+
+    get name() {
+        return this._node.name;
+    }
 }
 
 export default DiagramNode;
