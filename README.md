@@ -6,7 +6,7 @@ Simple javascript tool to visualize model relationships based on Eclipse Layout 
 
 ### 1.1.4 > 1.1.5
 
-Center selected node if it is out of view
+Center selected node (always or if is out of view only)
 
 ### 1.1.3 > 1.1.4
 
