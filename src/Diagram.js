@@ -290,7 +290,7 @@ class Diagram extends Component {
 
     centerNode(name) {
         const node = this._nodes.getNodeByName(name);
-        if (!this._zoomable || !this.isNodeOutOfView(node)) {
+        if (!this._zoomable) {
             return;
         }
 
@@ -307,7 +307,16 @@ class Diagram extends Component {
         );
     }
 
-    isNodeOutOfView(node) {
+    centerNodeIfOutOfView(name) {
+        if (!this.isNodeOutOfView(name)) {
+            return;
+        }
+
+        this.centerNode(name);
+    }
+
+    isNodeOutOfView(name) {
+        const node = this._nodes.getNodeByName(name);
         const currentPosition = node.container.node().getBoundingClientRect();
         const nodeOffset = {
             top: currentPosition.top - this._svgSize.top,

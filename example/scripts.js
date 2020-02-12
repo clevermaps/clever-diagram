@@ -69,7 +69,7 @@ class Example {
             const node = data[this.variant].node;
             if (doSelect) {
                 this.diagram.selectNode(node);
-                this.diagram.centerNode(node);
+                this.diagram.centerNodeIfOutOfView(node);
             } else {
                 this.diagram.deselectNode(node);
             }
