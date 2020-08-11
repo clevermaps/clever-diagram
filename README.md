@@ -4,6 +4,10 @@ Simple javascript tool to visualize model relationships based on Eclipse Layout 
 
 ## Changelog
 
+### 1.1.5 > 1.1.6
+
+Update to publish on NPM, removed old builds.
+
 ### 1.1.4 > 1.1.5
 
 Center selected node (always or if is out of view only)
