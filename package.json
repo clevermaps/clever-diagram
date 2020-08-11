@@ -1,8 +1,8 @@
 {
   "name": "clever-diagram",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Simple javascript tool to visualize model relationships based on Eclipse Layout Kernel.",
-  "main": "dist/clever-diagram-1.1.5.min.js",
+  "main": "dist/clever-diagram.min.js",
   "scripts": {
     "prebuild": "eslint src test",
     "build": "rollup -c",
@@ -11,12 +11,15 @@
     "test": "mocha",
     "prepublish": "npm test"
   },
-  "repository": "https://github.com/CleverMaps/clever-diagram.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CleverMaps/clever-diagram.git"
+  },
   "keywords": [
     "d3.js",
     "diagram"
   ],
-  "author": "Clever Maps s.r.o",
+  "author": "Clever Maps",
   "files": [
     "src",
     "dist"
@@ -39,5 +42,14 @@
     "rollup-plugin-postcss": "^0.4.1",
     "rollup-plugin-uglify": "^1.0.2",
     "rollup-watch": "^3.2.2"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/CleverMaps/clever-diagram/issues"
+  },
+  "homepage": "https://github.com/CleverMaps/clever-diagram#readme",
+  "directories": {
+    "example": "example",
+    "test": "test"
+  },
+  "license": "MIT"
 }
